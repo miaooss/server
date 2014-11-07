@@ -27,7 +27,7 @@
 
 /// Information related to the DBC fields on spells and other misc. properties of spells
  
-enum SpellCastFlags
+enum SpellCastTargetFlags
 {
     CAST_FLAG_NONE               = 0x00000000,
     CAST_FLAG_PENDING            = 0x00000001,              // aoe combat log?
@@ -35,8 +35,8 @@ enum SpellCastFlags
     CAST_FLAG_UNKNOWN_3          = 0x00000004,
     CAST_FLAG_UNKNOWN_4          = 0x00000008,              // ignore AOE visual
     CAST_FLAG_UNKNOWN_5          = 0x00000010,
-    CAST_FLAG_AMMO               = 0x00000020,              // Projectiles visual
-    CAST_FLAG_UNKNOWN_7          = 0x00000040,
+    CAST_FLAG_SOURCE_LOCATION    = 0x00000020,              
+    CAST_FLAG_DEST_LOCATION      = 0x00000040,
     CAST_FLAG_UNKNOWN_8          = 0x00000080,
     CAST_FLAG_UNKNOWN_9          = 0x00000100,
     CAST_FLAG_UNKNOWN_10         = 0x00000200,
@@ -98,6 +98,14 @@ enum SpellState
     SPELL_STATE_FINISHED  = 3,
     SPELL_STATE_IDLE      = 4,
     SPELL_STATE_DELAYED   = 5
+};
+
+enum SpellEffectHandleMode
+{
+    SPELL_EFFECT_HANDLE_LAUNCH,
+    SPELL_EFFECT_HANDLE_LAUNCH_TARGET,
+    SPELL_EFFECT_HANDLE_HIT,
+    SPELL_EFFECT_HANDLE_HIT_TARGET
 };
 
 enum SpellTargets
@@ -279,7 +287,9 @@ enum ProcFlagsEx
      PROC_EX_EVADE | PROC_EX_IMMUNE | PROC_EX_DEFLECT | \
      PROC_EX_ABSORB | PROC_EX_REFLECT | PROC_EX_INTERRUPT)
  
- 
+#define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
+
+#define MAPID_INVALID 0xFFFFFFFF
  
 #endif
  

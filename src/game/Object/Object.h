@@ -93,6 +93,15 @@ struct Position
     Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
     Position(float _x, float _y, float _z, float _o) : x(_x), y(_y), z(_z), o(_o) {}
     float x, y, z, o;
+    
+    float GetExactDist2dSq(float _x, float _y) const
+        { float dx = x - _x; float dy = y - _y; return dx*dx + dy*dy; }
+    float GetExactDist2d(const float _x, const float _y) const
+        { return std::sqrt(GetExactDist2dSq(_x, _y)); }
+    float GetExactDist2dSq(Position const* pos) const
+        { float dx = x - pos->x; float dy = y - pos->y; return dx*dx + dy*dy; }
+    float GetExactDist2d(Position const* pos) const
+        { return std::sqrt(GetExactDist2dSq(pos)); }
 };
 
 struct WorldLocation

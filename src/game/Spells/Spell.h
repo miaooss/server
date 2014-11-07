@@ -45,22 +45,19 @@ class GameObject;
 class Group;
 class Aura;
 
-bool IsQuestTameSpell(uint32 spellId);
-
-namespace MaNGOS
+struct SpellDestination
 {
-    struct SpellNotifierPlayer;
-    struct SpellNotifierCreatureAndPlayer;
-}
+    SpellDestination();
+    SpellDestination(float x, float y, float z, float orientation = 0.0f, uint32 mapId = MAPID_INVALID);
+    SpellDestination(Position const& pos);
+    SpellDestination(WorldObject const& wObj);
 
-class SpellCastTargets;
+    void Relocate(Position const& pos);
+    void RelocateOffset(Position const& offset);
 
-struct SpellCastTargetsReader
-{
-    explicit SpellCastTargetsReader(SpellCastTargets& _targets, Unit* _caster) : targets(_targets), caster(_caster) {}
-
-    SpellCastTargets& targets;
-    Unit* caster;
+    WorldLocation _position;
+    ObjectGuid _transportGUID;
+    Position _transportOffset;
 };
 
 class SpellCastTargets
@@ -69,85 +66,94 @@ class SpellCastTargets
         SpellCastTargets();
         ~SpellCastTargets();
 
-        void read(ByteBuffer& data, Unit* caster);
-        void write(ByteBuffer& data) const;
+        void Read(ByteBuffer& data, Unit* caster);
+        void Write(ByteBuffer& data) const;
+        
+        uint32 GetTargetMask() { return m_targetMask; }
+        void SetTargetMask(uint32 mask) { m_targetMask = mask; }
+        void SetTargetFlag(SpellCastTargetFlags flag) { m_targetMask |= flag; }
+        
+        ObjectGuid GetOriginalUnitTargetGuid() const;
+        void SetOriginalUnitTargetGuid(Unit* target);
 
-        SpellCastTargetsReader ReadForCaster(Unit* caster) { return SpellCastTargetsReader(*this, caster); }
+        void SetUnitTarget(Unit* target);
+        ObjectGuid GetUnitTargetGuid() const { return m_unitTargetGUID; }
+        Unit* GetUnitTarget() const { return m_unitTarget; }
+        
+        void SetGOTarget(GameObject* target);
+        ObjectGuid GetGOTargetGuid() const { return m_GOTargetGUID; }
+        GameObject* GetGOTarget() const { return m_GOTarget; }
+        
+        void SetCorpseTarget(Corpse* corpse);
+        ObjectGuid GetCorpseTargetGuid() const { return m_CorpseTargetGUID; }
+        
+        void RemoveObjectTarget();
+        ObjectGuid GetObjectTargetGuid() const;
+        WorldObject* GetObjectTarget() const;
+        
+        void SetItemTarget(Item* item);
+        ObjectGuid GetItemTargetGuid() const { return m_itemTargetGUID; }
+        Item* GetItemTarget() const { return m_itemTarget; }
+        uint32 GetItemTargetEntry() const { return m_itemTargetEntry; }
+        
+        void SetTradeItemTarget(Player* caster);
 
-        SpellCastTargets& operator=(const SpellCastTargets& target)
-        {
-            m_unitTarget = target.m_unitTarget;
-            m_itemTarget = target.m_itemTarget;
-            m_GOTarget   = target.m_GOTarget;
+        void UpdateTradeSlotItem();
 
-            m_unitTargetGUID    = target.m_unitTargetGUID;
-            m_GOTargetGUID      = target.m_GOTargetGUID;
-            m_CorpseTargetGUID  = target.m_CorpseTargetGUID;
-            m_itemTargetGUID    = target.m_itemTargetGUID;
-            m_srcTransportGUID  = target.m_srcTransportGUID;
-            m_destTransportGUID = target.m_destTransportGUID;
+        /// Source of the spell being cast
+        SpellDestination const* GetSource() const;
+        Position const* GetSourcePosition() const;
+        void SetSource(float x, float y, float z);
+        void SetSource(Position const& pos);
+        void SetSource(WorldObject const& wObj);
+        void ModifySource(Position const& pos);
+        void RemoveSource();
 
-            m_itemTargetEntry  = target.m_itemTargetEntry;
-
-            m_srcX = target.m_srcX;
-            m_srcY = target.m_srcY;
-            m_srcZ = target.m_srcZ;
-
-            m_destX = target.m_destX;
-            m_destY = target.m_destY;
-            m_destZ = target.m_destZ;
-
-            m_strTarget = target.m_strTarget;
-
-            m_targetMask = target.m_targetMask;
-
-            return *this;
-        }
-
-        void setUnitTarget(Unit* target);
-        ObjectGuid getUnitTargetGuid() const { return m_unitTargetGUID; }
-        Unit* getUnitTarget() const { return m_unitTarget; }
-
-        void setDestination(float x, float y, float z);
-        void setSource(float x, float y, float z);
-        void getDestination(float& x, float& y, float& z) const { x = m_destX; y = m_destY; z = m_destZ; }
-        void getSource(float& x, float& y, float& z) const { x = m_srcX; y = m_srcY, z = m_srcZ; }
-
-        void setGOTarget(GameObject* target);
-        ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
-        GameObject* getGOTarget() const { return m_GOTarget; }
-
-        void setCorpseTarget(Corpse* corpse);
-        ObjectGuid getCorpseTargetGuid() const { return m_CorpseTargetGUID; }
-
-        void setItemTarget(Item* item);
-        ObjectGuid getItemTargetGuid() const { return m_itemTargetGUID; }
-        Item* getItemTarget() const { return m_itemTarget; }
-        uint32 getItemTargetEntry() const { return m_itemTargetEntry; }
-
-        void setTradeItemTarget(Player* caster);
-
-        void updateTradeSlotItem()
+        /// Destination of the spell being cast
+        SpellDestination const* GetDestination() const;
+        WorldLocation const* GetDestinationPosition() const;
+        void SetDestination(float x, float y, float z, float orientation, uint32 mapId = MAPID_INVALID);
+        void SetDestination(Position const& pos);
+        void SetDestination(WorldObject const& wObj);
+        void SetDestination(SpellDestination const& spellDest);
+        void SetDestination(SpellCastTargets const& spellTargets);
+        void ModifyDestination(Position const& pos);
+        void ModifyDestination(SpellDestination const& spellDest);
+        void RemoveDestination();
+        
+        /// Check if certain information has been set
+        bool HasSource() const { return (GetTargetMask() & CAST_FLAG_SOURCE_LOCATION) != 0; }
+        bool HasDestination() const { return (GetTargetMask() & CAST_FLAG_DEST_LOCATION) != 0; }
+        bool HasTrajectory() const { return m_speed != 0; }
+        
+        /// Functions to get speed, elevation, distance, etc.
+        float GetElevation() const { return m_elevation; }
+        void SetElevation(float elevation) { m_elevation = elevation; }
+        
+        float GetSpeed() const { return m_speed; }
+        void SetSpeed(float speed) { m_speed = speed; }
+        
+        float GetDist2d() const { return m_source._position.GetExactDist2d(&m_destination._position); }
+        float GetSpeedXY() const { return m_speed * std::cos(m_elevation); }
+        float GetSpeedZ() const { return m_speed * std::sin(m_elevation); }
+        
+        void Update(Unit* caster);
+        /*void updateTradeSlotItem()
         {
             if (m_itemTarget && (m_targetMask & TARGET_FLAG_TRADE_ITEM))
             {
                 m_itemTargetGUID = m_itemTarget->GetObjectGuid();
                 m_itemTargetEntry = m_itemTarget->GetEntry();
             }
-        }
-
-        bool IsEmpty() const { return !m_GOTargetGUID && !m_unitTargetGUID && !m_itemTarget && !m_CorpseTargetGUID; }
-
-        void Update(Unit* caster);
+        }*/
 
         float m_srcX, m_srcY, m_srcZ;
         float m_destX, m_destY, m_destZ;
         std::string m_strTarget;
 
-        uint32 m_targetMask;
-
     private:
         // objects (can be used at spell creating and after Update at casting
+        WorldObject* m_targetObject;
         Unit* m_unitTarget;
         GameObject* m_GOTarget;
         Item* m_itemTarget;
@@ -157,32 +163,33 @@ class SpellCastTargets
         ObjectGuid m_GOTargetGUID;
         ObjectGuid m_CorpseTargetGUID;
         ObjectGuid m_itemTargetGUID;
-        ObjectGuid m_srcTransportGUID;
-        ObjectGuid m_destTransportGUID;
         uint32 m_itemTargetEntry;
+        
+        uint32 m_targetMask;
+        
+        SpellDestination m_source;
+        SpellDestination m_destination;
+        
+        float m_elevation, m_speed;
 };
 
-inline ByteBuffer& operator<< (ByteBuffer& buf, SpellCastTargets const& targets)
+struct SpellValue
 {
-    targets.write(buf);
-    return buf;
-}
+    explicit SpellValue(SpellEntry const* spellInfo);
+    int32 EffectBasePoints[TOTAL_SPELL_EFFECTS];
+    uint32 MaxAffectedTargets;
+    float RadiusMod;
+    uint8 AuraStackAmount;
+};
 
-inline ByteBuffer& operator>> (ByteBuffer& buf, SpellCastTargetsReader const& targets)
-{
-    targets.targets.read(buf, targets.caster);
-    return buf;
-}
-
-typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
+typedef std::list<std::pair<uint32, ObjectGuid>> DispelList;
 
 class Spell
 {
-        friend struct MaNGOS::SpellNotifierPlayer;
-        friend struct MaNGOS::SpellNotifierCreatureAndPlayer;
         friend void Unit::SetCurrentCastedSpell(Spell* pSpell);
-    public:
+public:
 
+        /// Spell Effects
         void EffectEmpty(SpellEffectIndex eff_idx);
         void EffectNULL(SpellEffectIndex eff_idx);
         void EffectUnused(SpellEffectIndex eff_idx);
@@ -216,8 +223,12 @@ class Spell
         void EffectDualWield(SpellEffectIndex eff_idx);
         void EffectPickPocket(SpellEffectIndex eff_idx);
         void EffectAddFarsight(SpellEffectIndex eff_idx);
+        void EffectUntrainTalents(SpellEffIndex effIndex);
         void EffectHealMechanical(SpellEffectIndex eff_idx);
         void EffectJump(SpellEffectIndex eff_idx);
+        void EffectJumpDest(SpellEffIndex effIndex);
+        void EffectLeapBack(SpellEffIndex effIndex);
+        void EffectQuestClear(SpellEffIndex effIndex);
         void EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx);
         void EffectLearnSkill(SpellEffectIndex eff_idx);
         void EffectAddHonor(SpellEffectIndex eff_idx);
@@ -228,14 +239,12 @@ class Spell
         void EffectSummonPet(SpellEffectIndex eff_idx);
         void EffectLearnPetSpell(SpellEffectIndex eff_idx);
         void EffectWeaponDmg(SpellEffectIndex eff_idx);
-        void EffectClearQuest(SpellEffectIndex eff_idx);
         void EffectForceCast(SpellEffectIndex eff_idx);
         void EffectTriggerSpell(SpellEffectIndex eff_idx);
         void EffectTriggerMissileSpell(SpellEffectIndex eff_idx);
         void EffectThreat(SpellEffectIndex eff_idx);
-        void EffectRestoreItemCharges(SpellEffectIndex eff_idx);
         void EffectHealMaxHealth(SpellEffectIndex eff_idx);
-        void EffectInterruptCast(SpellEffectIndex eff_idx);
+        void EffectInterruptCast(SpellEffIndex effIndex);
         void EffectSummonObjectWild(SpellEffectIndex eff_idx);
         void EffectScriptEffect(SpellEffectIndex eff_idx);
         void EffectSanctuary(SpellEffectIndex eff_idx);
@@ -250,29 +259,27 @@ class Spell
         void EffectResurrect(SpellEffectIndex eff_idx);
         void EffectParry(SpellEffectIndex eff_idx);
         void EffectBlock(SpellEffectIndex eff_idx);
-        void EffectLeapForward(SpellEffectIndex eff_idx);
-        void EffectLeapBack(SpellEffectIndex eff_idx);
+        void EffectLeap(SpellEffectIndex eff_idx);
         void EffectTransmitted(SpellEffectIndex eff_idx);
         void EffectDisEnchant(SpellEffectIndex eff_idx);
         void EffectInebriate(SpellEffectIndex eff_idx);
         void EffectFeedPet(SpellEffectIndex eff_idx);
         void EffectDismissPet(SpellEffectIndex eff_idx);
         void EffectReputation(SpellEffectIndex eff_idx);
+        void EffectForceDeselect(SpellEffIndex effIndex);
         void EffectSelfResurrect(SpellEffectIndex eff_idx);
         void EffectSkinning(SpellEffectIndex eff_idx);
         void EffectCharge(SpellEffectIndex eff_idx);
-        void EffectCharge2(SpellEffectIndex eff_idx);
+        void EffectChargeDest(SpellEffectIndex eff_idx);
         void EffectProspecting(SpellEffectIndex eff_idx);
-        void EffectRedirectThreat(SpellEffectIndex eff_idx);
         void EffectMilling(SpellEffectIndex eff_idx);
         void EffectRenamePet(SpellEffectIndex eff_idx);
         void EffectSendTaxi(SpellEffectIndex eff_idx);
+        void EffectSummonCritter(SpellEffIndex effIndex);
         void EffectKnockBack(SpellEffectIndex eff_idx);
-        void EffectPlayerPull(SpellEffectIndex eff_idx);
+        void EffectPullTowards(SpellEffIndex effIndex);
         void EffectDispelMechanic(SpellEffectIndex eff_idx);
-        void EffectSummonDeadPet(SpellEffectIndex eff_idx);
-        void EffectSummonAllTotems(SpellEffectIndex eff_idx);
-        void EffectBreakPlayerTargeting(SpellEffectIndex eff_idx);
+        void EffectResurrectPet(SpellEffIndex effIndex);
         void EffectDestroyAllTotems(SpellEffectIndex eff_idx);
         void EffectDurabilityDamage(SpellEffectIndex eff_idx);
         void EffectSkill(SpellEffectIndex eff_idx);
@@ -286,18 +293,20 @@ class Spell
         void EffectStealBeneficialBuff(SpellEffectIndex eff_idx);
         void EffectUnlearnSpecialization(SpellEffectIndex eff_idx);
         void EffectHealPct(SpellEffectIndex eff_idx);
-        void EffectEnergisePct(SpellEffectIndex eff_idx);
-        void EffectTriggerSpellWithValue(SpellEffectIndex eff_idx);
-        void EffectTriggerRitualOfSummoning(SpellEffectIndex eff_idx);
+        void EffectEnergizePct(SpellEffectIndex eff_idx);
+        void EffectTriggerRitualOfSummoning(SpellEffIndex effIndex);
+        void EffectSummonRaFFriend(SpellEffIndex effIndex);
         void EffectKillCreditPersonal(SpellEffectIndex eff_idx);
         void EffectKillCreditGroup(SpellEffectIndex eff_idx);
         void EffectQuestFail(SpellEffectIndex eff_idx);
-        void EffectQuestOffer(SpellEffectIndex eff_idx);
+        void EffectQuestStart(SpellEffectIndex eff_idx);
+        void EffectRedirectThreat(SpellEffectIndex eff_idx);
+        void EffectGameObjectDamage(SpellEffIndex effIndex);
+        void EffectGameObjectRepair(SpellEffIndex effIndex);
+        void EffectGameObjectSetDestructionState(SpellEffIndex effIndex);
         void EffectActivateRune(SpellEffectIndex eff_idx);
+        void EffectCreateTamedPet(SpellEffIndex effIndex);
         void EffectTeachTaxiNode(SpellEffectIndex eff_idx);
-        void EffectWMODamage(SpellEffectIndex eff_idx);
-        void EffectWMORepair(SpellEffectIndex eff_idx);
-        void EffectWMOChange(SpellEffectIndex eff_idx);
         void EffectTitanGrip(SpellEffectIndex eff_idx);
         void EffectEnchantItemPrismatic(SpellEffectIndex eff_idx);
         void EffectPlaySound(SpellEffectIndex eff_idx);
@@ -305,9 +314,12 @@ class Spell
         void EffectSpecCount(SpellEffectIndex eff_idx);
         void EffectActivateSpec(SpellEffectIndex eff_idx);
         void EffectCancelAura(SpellEffectIndex eff_idx);
-        void EffectKnockBackFromPosition(SpellEffectIndex eff_idx);
-        void EffectGravityPull(SpellEffectIndex eff_idx);
+        void EffectCastButtons(SpellEffIndex effIndex);
+        void EffectRechargeManaGem(SpellEffIndex effIndex);
 
+        typedef std::set<Aura*> UsedSpellMods;
+
+        // left off here
         Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();
 
