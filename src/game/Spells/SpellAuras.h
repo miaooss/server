@@ -26,6 +26,8 @@
 #define MANGOS_SPELLAURAS_H
 
 #include "SpellAuraInfo.h"
+#include "SpellEntryInfo.h"
+#include "SpellInfo.h"
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
 #include "Unit.h"
@@ -33,6 +35,7 @@
 class Aura;
 class AuraEffect;
 class Unit;
+class SpellInfo;
 struct SpellEntry;
 struct ProcTriggerSpell;
 
@@ -68,7 +71,7 @@ class AuraApplication
         uint8 GetSlot() const { return m_slot; }
         uint8 GetFlags() const { return m_flags; }
         uint8 GetEffectMask() const { return m_flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2); }
-        bool HasEffect(uint8 effect) const { MANGOS_ASSERT(effect < MAX_SPELL_EFFECTS); return (m_flags & (1 << effect)) != 0; }
+        bool HasEffect(uint8 effect) const { MANGOS_ASSERT(effect < TOTAL_SPELL_EFFECTS); return (m_flags & (1 << effect)) != 0; }
         bool IsPositive() const { return (m_flags & AFLAG_POSITIVE) != 0; }
         bool IsSelfcast() const { return (m_flags & AFLAG_CASTER) != 0; }
         uint8 GetEffectsToApply() const { return m_effectsToApply; }
@@ -84,15 +87,15 @@ class AuraApplication
 
 class Aura
 {
-        friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellEntry const* newAura, uint8 effMask, Unit* caster, int32 *baseAmount, Item* castItem, ObjectGuid casterGUID);
+        friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32 *baseAmount, Item* castItem, ObjectGuid casterGUID);
     public:
         typedef std::map<ObjectGuid, AuraApplication*> ApplicationMap;
         
-        static uint8 BuildEffectMaskForOwner(SpellEntry const* spellProto, uint8 avalibleEffectMask, WorldObject* owner);
-        static Aura* TryRefreshStackOrCreate(SpellEntry const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount = NULL, Item* castItem = NULL, ObjectGuid casterGUID = ObjectGuid(), bool* refresh = NULL);
-        static Aura* TryCreate(SpellEntry const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount = NULL, Item* castItem = NULL, ObjectGuid casterGUID = ObjectGuid::Empty);
-        static Aura* Create(SpellEntry const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID);
-        explicit Aura(SpellEntry const* spellproto, WorldObject* owner, Unit* caster, Item* castItem, ObjectGuid casterGUID);
+        static uint8 BuildEffectMaskForOwner(SpellInfo const* spellProto, uint8 avalibleEffectMask, WorldObject* owner);
+        static Aura* TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount = NULL, Item* castItem = NULL, ObjectGuid casterGUID = ObjectGuid(), bool* refresh = NULL);
+        static Aura* TryCreate(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount = NULL, Item* castItem = NULL, ObjectGuid casterGUID = ObjectGuid::Empty);
+        static Aura* Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID);
+        explicit Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, Item* castItem, ObjectGuid casterGUID);
         void _InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount);
         virtual ~Aura();
         

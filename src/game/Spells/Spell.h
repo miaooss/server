@@ -35,6 +35,7 @@
 #include "Object.h"
 #include "Player.h"
 
+#include "SpellEntryInfo.h"
 #include "SpellInfo.h"
 
 class WorldSession;
@@ -44,38 +45,8 @@ class Item;
 class GameObject;
 class Group;
 class Aura;
-
-class SpellImplicitTargetInfo
-{
-    private:
-        Targets _target;
-        
-    public:
-        SpellImplicitTargetInfo() : _target(Targets(0)) { }
-        SpellImplicitTargetInfo(uint32 target);
-        
-        bool IsArea() const;
-        SpellTargetSelectionCategories GetSelectionCategory() const;
-        SpellTargetReferenceTypes GetReferenceType() const;
-        SpellTargetObjectTypes GetObjectType() const;
-        SpellTargetCheckTypes GetCheckType() const;
-        SpellTargetDirectionTypes GetDirectionType() const;
-        float CalcDirectionAngle() const;
-        
-        Targets GetTarget() const;
-        uint32 GetExplicitTargetMask(bool& srcSet, bool& dstSet) const;
-        
-    private:
-        struct StaticData
-        {
-            SpellTargetObjectTypes ObjectType; // type of object returned by target type
-            SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting target
-            SpellTargetSelectionCategories SelectionCategory;
-            SpellTargetCheckTypes SelectionCheckType; // defines selection criteria
-            SpellTargetDirectionTypes DirectionType; // direction for cone and dest targets
-        };
-        static StaticData _data[TOTAL_SPELL_TARGETS];
-};
+class SpellInfo;
+class SpellEffectInfo;
 
 struct SpellDestination
 {
@@ -207,7 +178,7 @@ class SpellCastTargets
 
 struct SpellValue
 {
-    explicit SpellValue(SpellEntry const* spellInfo);
+    explicit SpellValue(SpellInfo const* spellInfo);
     int32 EffectBasePoints[TOTAL_SPELL_EFFECTS];
     uint32 MaxAffectedTargets;
     float RadiusMod;
@@ -351,7 +322,7 @@ public:
 
         typedef std::set<Aura*> UsedSpellMods;
 
-        Spell(Unit* caster, SpellEntry const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = ObjectGuid(), bool skipCheck = false);
+        Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = ObjectGuid(), bool skipCheck = false);
         ~Spell();
 
         void InitExplicitTargets(SpellCastTargets const& targets);

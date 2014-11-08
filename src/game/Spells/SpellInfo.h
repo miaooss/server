@@ -29,39 +29,38 @@
  
 enum SpellCastTargetFlags
 {
-    CAST_FLAG_NONE               = 0x00000000,
-    CAST_FLAG_PENDING            = 0x00000001,              // aoe combat log?
-    CAST_FLAG_UNKNOWN_2          = 0x00000002,
-    CAST_FLAG_UNKNOWN_3          = 0x00000004,
-    CAST_FLAG_UNKNOWN_4          = 0x00000008,              // ignore AOE visual
-    CAST_FLAG_UNKNOWN_5          = 0x00000010,
-    CAST_FLAG_SOURCE_LOCATION    = 0x00000020,              
-    CAST_FLAG_DEST_LOCATION      = 0x00000040,
-    CAST_FLAG_UNKNOWN_8          = 0x00000080,
-    CAST_FLAG_UNKNOWN_9          = 0x00000100,
-    CAST_FLAG_UNKNOWN_10         = 0x00000200,
-    CAST_FLAG_UNKNOWN_11         = 0x00000400,
-    CAST_FLAG_POWER_LEFT_SELF    = 0x00000800,
-    CAST_FLAG_UNKNOWN_13         = 0x00001000,
-    CAST_FLAG_UNKNOWN_14         = 0x00002000,
-    CAST_FLAG_UNKNOWN_15         = 0x00004000,
-    CAST_FLAG_UNKNOWN_16         = 0x00008000,
-    CAST_FLAG_UNKNOWN_17         = 0x00010000,
-    CAST_FLAG_ADJUST_MISSILE     = 0x00020000,
-    CAST_FLAG_NO_GCD             = 0x00040000,              // no GCD for spell casts from charm/summon (vehicle spells is an example)
-    CAST_FLAG_VISUAL_CHAIN       = 0x00080000,
-    CAST_FLAG_UNKNOWN_21         = 0x00100000,
-    CAST_FLAG_RUNE_LIST          = 0x00200000,
-    CAST_FLAG_UNKNOWN_23         = 0x00400000,
-    CAST_FLAG_UNKNOWN_24         = 0x00800000,
-    CAST_FLAG_UNKNOWN_25         = 0x01000000,
-    CAST_FLAG_UNKNOWN_26         = 0x02000000,
-    CAST_FLAG_IMMUNITY           = 0x04000000,
-    CAST_FLAG_UNKNOWN_28         = 0x08000000,
-    CAST_FLAG_UNKNOWN_29         = 0x10000000,
-    CAST_FLAG_UNKNOWN_30         = 0x20000000,
-    CAST_FLAG_UNKNOWN_31         = 0x40000000,
-    CAST_FLAG_UNKNOWN_32         = 0x80000000
+    TARGET_FLAG_NONE            = 0x00000000,
+    TARGET_FLAG_UNUSED_1        = 0x00000001,               // not used
+    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
+    TARGET_FLAG_UNIT_RAID       = 0x00000004,               // not sent, used to validate target (if raid member)
+    TARGET_FLAG_UNIT_PARTY      = 0x00000008,               // not sent, used to validate target (if party member)
+    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
+    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // pguid, 3 float
+    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // pguid, 3 float
+    TARGET_FLAG_UNIT_ENEMY      = 0x00000080,               // not sent, used to validate target (if enemy)
+    TARGET_FLAG_UNIT_ALLY       = 0x00000100,               // not sent, used to validate target (if ally)
+    TARGET_FLAG_CORPSE_ENEMY    = 0x00000200,               // pguid
+    TARGET_FLAG_UNIT_DEAD       = 0x00000400,               // not sent, used to validate target (if dead creature)
+    TARGET_FLAG_GAMEOBJECT      = 0x00000800,               // pguid, used with TARGET_GAMEOBJECT_TARGET
+    TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid
+    TARGET_FLAG_STRING          = 0x00002000,               // string
+    TARGET_FLAG_GAMEOBJECT_ITEM = 0x00004000,               // not sent, used with TARGET_GAMEOBJECT_ITEM_TARGET
+    TARGET_FLAG_CORPSE_ALLY     = 0x00008000,               // pguid
+    TARGET_FLAG_UNIT_MINIPET    = 0x00010000,               // pguid, used to validate target (if non combat pet)
+    TARGET_FLAG_GLYPH_SLOT      = 0x00020000,               // used in glyph spells
+    TARGET_FLAG_DEST_TARGET     = 0x00040000,               // sometimes appears with DEST_TARGET spells (may appear or not for a given spell)
+    TARGET_FLAG_UNUSED20        = 0x00080000,               // uint32 counter, loop { vec3 - screen position (?), guid }, not used so far
+    TARGET_FLAG_UNIT_PASSENGER  = 0x00100000,               // guessed, used to validate target (if vehicle passenger)
+
+    TARGET_FLAG_UNIT_MASK       = TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_RAID | TARGET_FLAG_UNIT_PARTY
+                                  | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT_DEAD 
+                                  | TARGET_FLAG_UNIT_MINIPET | TARGET_FLAG_UNIT_PASSENGER,
+                                  
+    TARGET_FLAG_GAMEOBJECT_MASK = TARGET_FLAG_GAMEOBJECT | TARGET_FLAG_GAMEOBJECT_ITEM,
+    
+    TARGET_FLAG_CORPSE_MASK     = TARGET_FLAG_CORPSE_ALLY | TARGET_FLAG_CORPSE_ENEMY,
+    
+    TARGET_FLAG_ITEM_MASK       = TARGET_FLAG_TRADE_ITEM | TARGET_FLAG_ITEM | TARGET_FLAG_GAMEOBJECT_ITEM
 };
 
 enum SpellFlags
@@ -365,6 +364,62 @@ enum SpellTargetDirectionTypes
     TARGET_DIR_FRONT_LEFT,
     TARGET_DIR_RANDOM,
     TARGET_DIR_ENTRY
+};
+
+enum SpellEffectImplicitTargetTypes
+{
+    EFFECT_IMPLICIT_TARGET_NONE = 0,
+    EFFECT_IMPLICIT_TARGET_EXPLICIT,
+    EFFECT_IMPLICIT_TARGET_CASTER
+};
+
+// Spell clasification
+enum SpellSpecificType
+{
+    SPELL_SPECIFIC_NORMAL                        = 0,
+    SPELL_SPECIFIC_SEAL                          = 1,
+    SPELL_SPECIFIC_AURA                          = 3,
+    SPELL_SPECIFIC_STING                         = 4,
+    SPELL_SPECIFIC_CURSE                         = 5,
+    SPELL_SPECIFIC_ASPECT                        = 6,
+    SPELL_SPECIFIC_TRACKER                       = 7,
+    SPELL_SPECIFIC_WARLOCK_ARMOR                 = 8,
+    SPELL_SPECIFIC_MAGE_ARMOR                    = 9,
+    SPELL_SPECIFIC_ELEMENTAL_SHIELD              = 10,
+    SPELL_SPECIFIC_MAGE_POLYMORPH                = 11,
+    SPELL_SPECIFIC_JUDGEMENT                     = 13,
+    SPELL_SPECIFIC_WARLOCK_CORRUPTION            = 17,
+    SPELL_SPECIFIC_FOOD                          = 19,
+    SPELL_SPECIFIC_DRINK                         = 20,
+    SPELL_SPECIFIC_FOOD_AND_DRINK                = 21,
+    SPELL_SPECIFIC_PRESENCE                      = 22,
+    SPELL_SPECIFIC_CHARM                         = 23,
+    SPELL_SPECIFIC_SCROLL                        = 24,
+    SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE         = 25,
+    SPELL_SPECIFIC_WARRIOR_ENRAGE                = 26,
+    SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT          = 27,
+    SPELL_SPECIFIC_HAND                          = 28
+};
+
+enum SpellCustomAttributes
+{
+    SPELL_ATTR0_CU_ENCHANT_PROC                  = 0x00000001,
+    SPELL_ATTR0_CU_CONE_BACK                     = 0x00000002,
+    SPELL_ATTR0_CU_CONE_LINE                     = 0x00000004,
+    SPELL_ATTR0_CU_SHARE_DAMAGE                  = 0x00000008,
+    SPELL_ATTR0_CU_NO_INITIAL_THREAT             = 0x00000010,
+    SPELL_ATTR0_CU_AURA_CC                       = 0x00000040,
+    SPELL_ATTR0_CU_DIRECT_DAMAGE                 = 0x00000100,
+    SPELL_ATTR0_CU_CHARGE                        = 0x00000200,
+    SPELL_ATTR0_CU_PICKPOCKET                    = 0x00000400,
+    SPELL_ATTR0_CU_NEGATIVE_EFF0                 = 0x00001000,
+    SPELL_ATTR0_CU_NEGATIVE_EFF1                 = 0x00002000,
+    SPELL_ATTR0_CU_NEGATIVE_EFF2                 = 0x00004000,
+    SPELL_ATTR0_CU_IGNORE_ARMOR                  = 0x00008000,
+    SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER      = 0x00010000,
+    SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET      = 0x00020000,
+
+    SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
 };
 
 // total spell targets = TARGET_TOTAL

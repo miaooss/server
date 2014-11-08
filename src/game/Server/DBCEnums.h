@@ -360,6 +360,12 @@ enum TotemCategoryType
     TOTEM_CATEGORY_TYPE_SPANNER = 24
 };
 
+enum SpellCategoryFlags
+{
+    SPELL_CATEGORY_FLAG_COOLDOWN_SCALES_WITH_WEAPON_SPEED = 0x01, // unused
+    SPELL_CATEGORY_FLAG_COOLDOWN_STARTS_ON_EVENT = 0x04
+};
+
 // SummonProperties.dbc, col 0          == Id               (m_id)
 // SummonProperties.dbc, col 1          == Group            (m_control)
 enum SummonPropGroup

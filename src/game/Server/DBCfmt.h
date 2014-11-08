@@ -102,6 +102,7 @@ const char SkillLineAbilityfmt[] = "niiiixxiiiiixx";
 const char SkillRaceClassInfofmt[] = "diiiiixx";
 const char SoundEntriesfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SpellCastTimefmt[] = "nixx";
+const char SpellCategoryfmt[] = "ni";
 const char SpellDurationfmt[] = "niii";
 const char SpellDifficultyfmt[] = "niiii";
 const char SpellEntryfmt[] = "niiiiiiiiiiiixixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifxiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiixssssssssssssssssxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiixfffxxxiiiiixxxxxxi";
