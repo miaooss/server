@@ -1364,6 +1364,7 @@ enum Targets
     TARGET_106                         = 106,
     TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
     TARGET_NARROW_FRONTAL_CONE_2       = 110,
+    TARGET_TOTAL,
 };
 
 /**

@@ -45,6 +45,38 @@ class GameObject;
 class Group;
 class Aura;
 
+class SpellImplicitTargetInfo
+{
+    private:
+        Targets _target;
+        
+    public:
+        SpellImplicitTargetInfo() : _target(Targets(0)) { }
+        SpellImplicitTargetInfo(uint32 target);
+        
+        bool IsArea() const;
+        SpellTargetSelectionCategories GetSelectionCategory() const;
+        SpellTargetReferenceTypes GetReferenceType() const;
+        SpellTargetObjectTypes GetObjectType() const;
+        SpellTargetCheckTypes GetCheckType() const;
+        SpellTargetDirectionTypes GetDirectionType() const;
+        float CalcDirectionAngle() const;
+        
+        Targets GetTarget() const;
+        uint32 GetExplicitTargetMask(bool& srcSet, bool& dstSet) const;
+        
+    private:
+        struct StaticData
+        {
+            SpellTargetObjectTypes ObjectType; // type of object returned by target type
+            SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting target
+            SpellTargetSelectionCategories SelectionCategory;
+            SpellTargetCheckTypes SelectionCheckType; // defines selection criteria
+            SpellTargetDirectionTypes DirectionType; // direction for cone and dest targets
+        };
+        static StaticData _data[TOTAL_SPELL_TARGETS];
+};
+
 struct SpellDestination
 {
     SpellDestination();
@@ -319,12 +351,38 @@ public:
 
         typedef std::set<Aura*> UsedSpellMods;
 
-        // left off here
-        Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        Spell(Unit* caster, SpellEntry const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = ObjectGuid(), bool skipCheck = false);
         ~Spell();
 
-        void prepare(SpellCastTargets const* targets, Aura* triggeredByAura = NULL);
+        void InitExplicitTargets(SpellCastTargets const& targets);
+        void SelectExplicitTargets();
 
+        void SelectSpellTargets();
+        void SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, uint32& processedEffectMask);
+        void SelectImplicitChannelTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
+        void SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, uint32 effMask);
+        void SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, uint32 effMask);
+        void SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, uint32 effMask);
+        void SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
+        void SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
+        void SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
+        void SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
+        void SelectImplicitTargetObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
+        void SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, WorldObject* target, uint32 effMask);
+        void SelectImplicitTrajTargets(SpellEffIndex effIndex);
+
+        void SelectEffectTypeImplicitTargets(uint8 effIndex);
+
+        //todo: spell conditions
+        uint32 GetSearcherTypeMask(SpellTargetObjectTypes objType, /*ConditionList* condList*/);
+        
+        WorldObject* SearchNearbyTarget(float range, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, /*ConditionList* condList = NULL*/);
+        void SearchAreaTargets(std::list<WorldObject*>& targets, float range, Position const* position, Unit* referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, /*ConditionList* condList*/);
+        void SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTargets, WorldObject* target, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectType, /*ConditionList* condList*/, bool isChainHeal);
+        
+        GameObject* SearchSpellFocus();
+        
+        // left off here
         void cancel();
 
         void update(uint32 difftime);

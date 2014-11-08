@@ -281,6 +281,94 @@ enum ProcFlagsEx
     PROC_EX_CAST_END            = 0x0080000                 // procs on end of cast
 };
 
+enum TriggerCastFlags
+{
+    TRIGGERED_NONE                                  = 0x00000000,   //! Not triggered
+    TRIGGERED_IGNORE_GCD                            = 0x00000001,   //! Will ignore GCD
+    TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD          = 0x00000002,   //! Will ignore Spell and Category cooldowns
+    TRIGGERED_IGNORE_POWER_AND_REAGENT_COST         = 0x00000004,   //! Will ignore power and reagent cost
+    TRIGGERED_IGNORE_CAST_ITEM                      = 0x00000008,   //! Will not take away cast item or update related achievement criteria
+    TRIGGERED_IGNORE_AURA_SCALING                   = 0x00000010,   //! Will ignore aura scaling
+    TRIGGERED_IGNORE_CAST_IN_PROGRESS               = 0x00000020,   //! Will not check if a current cast is in progress
+    TRIGGERED_IGNORE_COMBO_POINTS                   = 0x00000040,   //! Will ignore combo point requirement
+    TRIGGERED_CAST_DIRECTLY                         = 0x00000080,   //! In Spell::prepare, will be cast directly without setting containers for executed spell
+    TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS           = 0x00000100,   //! Will ignore interruptible aura's at cast
+    TRIGGERED_IGNORE_SET_FACING                     = 0x00000200,   //! Will not adjust facing to target (if any)
+    TRIGGERED_IGNORE_SHAPESHIFT                     = 0x00000400,   //! Will ignore shapeshift checks
+    TRIGGERED_IGNORE_CASTER_AURASTATE               = 0x00000800,   //! Will ignore caster aura states including combat requirements and death state
+    TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE   = 0x00002000,   //! Will ignore mounted/on vehicle restrictions
+    TRIGGERED_IGNORE_CASTER_AURAS                   = 0x00010000,   //! Will ignore caster aura restrictions or requirements
+    TRIGGERED_DISALLOW_PROC_EVENTS                  = 0x00020000,   //! Disallows proc events from triggered spell (default)
+    TRIGGERED_DONT_REPORT_CAST_ERROR                = 0x00040000,   //! Will return SPELL_FAILED_DONT_REPORT in CheckCast functions
+    TRIGGERED_IGNORE_EQUIPPED_ITEM_REQUIREMENT      = 0x00080000,   //! Will ignore equipped item requirements
+    TRIGGERED_FULL_MASK                             = 0xFFFFFFFF
+};
+
+enum SpellTargetSelectionCategories
+{
+    TARGET_SELECT_CATEGORY_NYI,
+    TARGET_SELECT_CATEGORY_DEFAULT,
+    TARGET_SELECT_CATEGORY_CHANNEL,
+    TARGET_SELECT_CATEGORY_NEARBY,
+    TARGET_SELECT_CATEGORY_CONE,
+    TARGET_SELECT_CATEGORY_AREA
+};
+
+enum SpellTargetReferenceTypes
+{
+    TARGET_REFERENCE_TYPE_NONE,
+    TARGET_REFERENCE_TYPE_CASTER,
+    TARGET_REFERENCE_TYPE_TARGET,
+    TARGET_REFERENCE_TYPE_LAST,
+    TARGET_REFERENCE_TYPE_SRC,
+    TARGET_REFERENCE_TYPE_DEST
+};
+
+enum SpellTargetObjectTypes
+{
+    TARGET_OBJECT_TYPE_NONE = 0,
+    TARGET_OBJECT_TYPE_SRC,
+    TARGET_OBJECT_TYPE_DEST,
+    TARGET_OBJECT_TYPE_UNIT,
+    TARGET_OBJECT_TYPE_UNIT_AND_DEST,
+    TARGET_OBJECT_TYPE_GOBJ,
+    TARGET_OBJECT_TYPE_GOBJ_ITEM,
+    TARGET_OBJECT_TYPE_ITEM,
+    TARGET_OBJECT_TYPE_CORPSE,
+    // only for effect target type
+    TARGET_OBJECT_TYPE_CORPSE_ENEMY,
+    TARGET_OBJECT_TYPE_CORPSE_ALLY
+};
+
+enum SpellTargetCheckTypes
+{
+    TARGET_CHECK_DEFAULT,
+    TARGET_CHECK_ENTRY,
+    TARGET_CHECK_ENEMY,
+    TARGET_CHECK_ALLY,
+    TARGET_CHECK_PARTY,
+    TARGET_CHECK_RAID,
+    TARGET_CHECK_RAID_CLASS,
+    TARGET_CHECK_PASSENGER
+};
+
+enum SpellTargetDirectionTypes
+{
+    TARGET_DIR_NONE,
+    TARGET_DIR_FRONT,
+    TARGET_DIR_BACK,
+    TARGET_DIR_RIGHT,
+    TARGET_DIR_LEFT,
+    TARGET_DIR_FRONT_RIGHT,
+    TARGET_DIR_BACK_RIGHT,
+    TARGET_DIR_BACK_LEFT,
+    TARGET_DIR_FRONT_LEFT,
+    TARGET_DIR_RANDOM,
+    TARGET_DIR_ENTRY
+};
+
+// total spell targets = TARGET_TOTAL
+
 #define AURA_SPELL_PROC_EX_MASK \
     (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT | PROC_EX_MISS | \
      PROC_EX_RESIST | PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK | \
