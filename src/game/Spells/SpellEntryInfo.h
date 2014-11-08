@@ -22,15 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
  
- #ifndef MANGOS_H_SPELLENTRYINFO
- #define MANGOS_H_SPELLENTRYINFO
+#ifndef MANGOS_H_SPELLENTRYINFO
+#define MANGOS_H_SPELLENTRYINFO
  
- #include "Common.h"
- #include "DBCStructure.h"
- #include "Object.h"
- #include "SpellAuraInfo.h"
- #include "SpellInfo.h"
- #include "Util.h"
+#include "Common.h"
+#include "DBCStructure.h"
+#include "Object.h"
+#include "SharedDefines.h"
+#include "SpellAuraInfo.h"
+#include "SpellInfo.h"
+#include "Util.h"
  
 class Unit;
 class Player;
@@ -52,7 +53,7 @@ uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
 class SpellImplicitTargetInfo
 {
     private:
-        Targets _target;
+        Targets m_target;
         
     public:
         SpellImplicitTargetInfo() : _target(Targets(0)) { }
@@ -78,7 +79,7 @@ class SpellImplicitTargetInfo
             SpellTargetCheckTypes SelectionCheckType; // defines selection criteria
             SpellTargetDirectionTypes DirectionType; // direction for cone and dest targets
         };
-        static StaticData _data[TOTAL_SPELL_TARGETS];
+        static StaticData m_data[TOTAL_SPELL_TARGETS];
 };
 
 class SpellEffectInfo
