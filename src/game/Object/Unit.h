@@ -34,6 +34,7 @@
 #include "Object.h"
 #include "Opcodes.h"
 #include "SpellAuraDefines.h"
+#include "SpellEntryInfo.h"
 #include "UpdateFields.h"
 #include "SharedDefines.h"
 #include "ThreatManager.h"
@@ -3120,6 +3121,8 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void RemoveMiniPet();
         Pet* GetMiniPet() const;
         void SetMiniPet(Unit* pet) { SetCritterGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
+        
+        bool IsControlledByPlayer() const { return m_ControlledByPlayer; }
 
         /** 
          * Gets either the current charmer (ie mind control) or the owner of this \ref Unit
@@ -3322,6 +3325,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         template<typename Func>
         bool CheckAllControlledUnits(Func const& func, uint32 controlledMask) const;
 
+        // related to spell code
+        Player* m_movedPlayer;
+        
         /** 
          * Adds a \ref SpellAuraHolder
          * @param holder the holder to add
@@ -3810,6 +3816,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 
+        float ApplyEffectModifiers(SpellInfo const* spellProto, uint8 effect_index, float value) const;
         int32 CalculateSpellDamage(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = NULL);
 
         uint32 CalcNotIgnoreAbsorbDamage(uint32 damage, SpellSchoolMask damageSchoolMask, SpellEntry const* spellInfo = NULL);
@@ -3856,6 +3863,8 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         PetAuraSet m_petAuras;
         void AddPetAura(PetAura const* petSpell);
         void RemovePetAura(PetAura const* petSpell);
+        
+        bool m_ControlledByPlayer;
 
         // Movement info
         MovementInfo m_movementInfo;

@@ -211,7 +211,9 @@ Unit::Unit() :
     i_motionMaster(this),
     m_vehicleInfo(NULL),
     m_ThreatManager(this),
-    m_HostileRefManager(this)
+    m_HostileRefManager(this),
+    m_movedPlayer(NULL),
+    m_ControlledByPlayer(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -6244,6 +6246,7 @@ void Unit::Uncharm()
 {
     if (Unit* charm = GetCharm())
     {
+        charm->m_ControlledByPlayer = false;
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
@@ -6255,11 +6258,19 @@ void Unit::SetPet(Pet* pet)
     SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid());
 
     if (pet && GetTypeId() == TYPEID_PLAYER)
+    {
+        pet->m_ControlledByPlayer = true;
         ((Player*)this)->SendPetGUIDs();
+    }
 }
 
 void Unit::SetCharm(Unit* pet)
 {
+    if (GetTypeId() == TYPEID_PLAYER)
+        { pet->m_ControlledByPlayer = true; }
+    else
+        { pet->m_ControlledByPlayer = false; }
+        
     SetCharmGuid(pet ? pet->GetObjectGuid() : ObjectGuid());
 }
 
@@ -9071,6 +9082,28 @@ bool Unit::SelectHostileTarget()
 //======================================================================
 //======================================================================
 //======================================================================
+
+float Unit::ApplyEffectModifiers(SpellInfo const* spellProto, uint8 effect_index, float value) const
+{
+    if (Player* modOwner = GetSpellModOwner())
+    {
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
+        switch (effect_index)
+        {
+            case 0:
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT1, value);
+                break;
+            case 1:
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT2, value);
+                break;
+            case 2:
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT3, value);
+                break;
+        }
+    }
+    
+    return value;
+}
 
 int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints)
 {

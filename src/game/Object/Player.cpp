@@ -18539,6 +18539,7 @@ void Player::AddSpellMod(Aura* aura, bool apply)
         m_spellMods[mod->m_miscvalue].remove(aura);
 }
 
+//todo: use spellinfo rather than spellentry after it's finished
 template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell const* /*spell*/)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
