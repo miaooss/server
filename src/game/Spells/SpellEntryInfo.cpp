@@ -899,3 +899,405 @@ bool SpellInfo::HasAreaAuraEffect() const
     return false;
 }
 
+bool SpellInfo::IsExplicitDiscovery() const
+{
+    return ((Effects[0].Effect == SPELL_EFFECT_CREATE_RANDOM_ITEM
+        || Effects[0].Effect == SPELL_EFFECT_CREATE_ITEM_2)
+        && Effects[1].Effect == SPELL_EFFECT_SCRIPT_EFFECT);
+        // || Id == 64323; (book of glyph mastery- implement in spell script rather than core)
+}
+
+bool SpellInfo::IsLootCrafting() const
+{
+    return (Effects[0].Effect == SPELL_EFFECT_CREATE_RANDOM_ITEM ||
+        // different random cards from Inscription (121==Virtuoso Inking Set category) r without explicit item
+        (Effects[0].Effect == SPELL_EFFECT_CREATE_ITEM_2 &&
+        ((TotemCategory[0] != 0 || (Totem[0] != 0 && SpellIconID == 1)) || Effects[0].ItemType == 0)));
+}
+
+bool SpellInfo::IsQuestTame() const
+{
+    return Effects[0].Effect == SPELL_EFFECT_THREAT && Effects[1].Effect == SPELL_EFFECT_APPLY_AURA && Effects[1].ApplyAuraName == SPELL_AURA_DUMMY;
+}
+
+bool SpellInfo::IsProfessionOrRiding() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (Effects[i].Effect == SPELL_EFFECT_SKILL)
+        {
+            uint32 skill = Effects[i].MiscValue;
+
+            if (IsProfessionOrRidingSkill(skill))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool SpellInfo::IsProfession() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (Effects[i].Effect == SPELL_EFFECT_SKILL)
+        {
+            uint32 skill = Effects[i].MiscValue;
+
+            if (IsProfessionSkill(skill))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool SpellInfo::IsPrimaryProfession() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (Effects[i].Effect == SPELL_EFFECT_SKILL)
+        {
+            uint32 skill = Effects[i].MiscValue;
+
+            if (IsPrimaryProfessionSkill(skill))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool SpellInfo::IsPrimaryProfessionFirstRank() const
+{
+    return IsPrimaryProfession() && GetRank() == 1;
+}
+
+// Implement these two functions later
+/*
+bool SpellInfo::IsAbilityLearnedWithProfession() const
+{
+    SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(Id);
+
+    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+    {
+        SkillLineAbilityEntry const* pAbility = _spell_idx->second;
+        if (!pAbility || pAbility->AutolearnType != SKILL_LINE_ABILITY_LEARNED_ON_SKILL_VALUE)
+            continue;
+
+        if (pAbility->req_skill_value > 0)
+            return true;
+    }
+
+    return false;
+}
+
+bool SpellInfo::IsAbilityOfSkillType(uint32 skillType) const
+{
+    SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(Id);
+
+    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+        if (_spell_idx->second->skillId == uint32(skillType))
+            return true;
+
+    return false;
+}
+*/
+
+bool SpellInfo::IsAffectingArea() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (Effects[i].IsEffect() && (Effects[i].IsTargetingArea() || Effects[i].IsEffect(SPELL_EFFECT_PERSISTENT_AREA_AURA) || Effects[i].IsAreaAuraEffect()))
+            return true;
+    return false;
+}
+
+// checks if spell targets are selected from area, doesn't include spell effects in check (like area wide auras for example)
+bool SpellInfo::IsTargetingArea() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (Effects[i].IsEffect() && Effects[i].IsTargetingArea())
+            return true;
+    return false;
+}
+
+bool SpellInfo::NeedsExplicitUnitTarget() const
+{
+    return (GetExplicitTargetMask() & TARGET_FLAG_UNIT_MASK) != 0;
+}
+
+bool SpellInfo::NeedsToBeTriggeredByCaster(SpellInfo const* triggeringSpell) const
+{
+    if (NeedsExplicitUnitTarget())
+        return true;
+
+    if (triggeringSpell->IsChanneled())
+    {
+        uint32 mask = 0;
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (Effects[i].TargetA.GetTarget() != TARGET_UNIT_CASTER && Effects[i].TargetA.GetTarget() != TARGET_DEST_CASTER
+                && Effects[i].TargetB.GetTarget() != TARGET_UNIT_CASTER && Effects[i].TargetB.GetTarget() != TARGET_DEST_CASTER)
+            {
+                mask |= Effects[i].GetProvidedTargetMask();
+            }
+        }
+
+        if (mask & TARGET_FLAG_UNIT_MASK)
+            return true;
+    }
+
+    return false;
+}
+
+bool SpellInfo::IsPassive() const
+{
+    return (Attributes & SPELL_ATTR_PASSIVE) != 0;
+}
+
+bool SpellInfo::IsAutocastable() const
+{
+    if (Attributes & SPELL_ATTR_PASSIVE)
+        return false;
+    if (AttributesEx & SPELL_ATTR_EX_UNAUTOCASTABLE_BY_PET)
+        return false;
+    return true;
+}
+
+bool SpellInfo::IsStackableWithRanks() const
+{
+    if (IsPassive())
+        return false;
+    if (PowerType != POWER_MANA && PowerType != POWER_HEALTH)
+        return false;
+    if (IsProfessionOrRiding())
+        return false;
+
+    if (IsAbilityLearnedWithProfession())
+        return false;
+
+    // All stance spells. if any better way, change it.
+    for (uint8 i = 0; i < TOTAL_SPELL_EFFECTS; ++i)
+    {
+        switch (SpellFamilyName)
+        {
+            case SPELLFAMILY_PALADIN:
+                // Paladin aura Spell
+                if (Effects[i].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID)
+                    return false;
+                break;
+            case SPELLFAMILY_DRUID:
+                // Druid form Spell
+                if (Effects[i].Effect == SPELL_EFFECT_APPLY_AURA &&
+                    Effects[i].ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+                    return false;
+                break;
+        }
+    }
+    return true;
+}
+
+bool SpellInfo::IsPassiveStackableWithRanks() const
+{
+    return IsPassive() && !HasEffect(SPELL_EFFECT_APPLY_AURA);
+}
+
+bool SpellInfo::IsMultiSlotAura() const
+{
+    return IsPassive(); // put in scripts: || Id == 55849 || Id == 40075 || Id == 44413; // Power Spark, Fel Flak Fire, Incanter's Absorption
+}
+
+bool SpellInfo::IsStackableOnOneSlotWithDifferentCasters() const
+{
+    /// TODO: Re-verify meaning of SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS and update conditions here
+    return StackAmount > 1 && !IsChanneled() && !(AttributesEx3 & SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS);
+}
+
+bool SpellInfo::IsCooldownStartedOnEvent() const
+{
+    return Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE || (CategoryEntry && CategoryEntry->Flags & SPELL_CATEGORY_FLAG_COOLDOWN_STARTS_ON_EVENT);
+}
+
+bool SpellInfo::IsDeathPersistent() const
+{
+    return (AttributesEx3 & SPELL_ATTR_EX3_DEATH_PERSISTENT) != 0;
+}
+
+bool SpellInfo::IsRequiringDeadTarget() const
+{
+    return (AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD) != 0;
+}
+
+bool SpellInfo::IsAllowingDeadTarget() const
+{
+    return AttributesEx2 & SPELL_ATTR_EX2_CAN_TARGET_DEAD || Targets & (TARGET_FLAG_CORPSE_ALLY | TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_UNIT_DEAD);
+}
+
+bool SpellInfo::CanBeUsedInCombat() const
+{
+    return !(Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT);
+}
+
+bool SpellInfo::IsPositive() const
+{
+    return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE);
+}
+
+bool SpellInfo::IsPositiveEffect(uint8 effIndex) const
+{
+    switch (effIndex)
+    {
+        default:
+        case 0:
+            return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF0);
+        case 1:
+            return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF1);
+        case 2:
+            return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE_EFF2);
+    }
+}
+
+bool SpellInfo::IsChanneled() const
+{
+    return (AttributesEx & (SPELL_ATTR_EX_CHANNELED_1 | SPELL_ATTR_EX_CHANNELED_2)) != 0;
+}
+
+bool SpellInfo::NeedsComboPoints() const
+{
+    return (AttributesEx & (SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS | SPELL_ATTR_EX_REQ_COMBO_POINTS)) != 0;
+}
+
+bool SpellInfo::IsBreakingStealth() const
+{
+    return !(AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH);
+}
+
+bool SpellInfo::IsRangedWeaponSpell() const
+{
+    return (SpellFamilyName == SPELLFAMILY_HUNTER && !(SpellFamilyFlags & UI64LIT(0x0000000010000000))) // for 53352, cannot find better way
+        || (EquippedItemSubClassMask & ITEM_SUBCLASS_MASK_WEAPON_RANGED);
+}
+
+bool SpellInfo::IsAutoRepeatRangedSpell() const
+{
+    return (AttributesEx2 & SPELL_ATTR_EX2_AUTOREPEAT_FLAG) != 0;
+}
+
+bool SpellInfo::IsAffectedBySpellMods() const
+{
+    return !(AttributesEx3 & SPELL_ATTR_EX3_NO_DONE_BONUS);
+}
+
+// Implement later
+/*bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
+{
+    if (!IsAffectedBySpellMods())
+        return false;
+
+    SpellInfo const* affectSpell = sSpellMgr->GetSpellInfo(mod->spellId);
+    // False if affect_spell == NULL or spellFamily not equal
+    if (!affectSpell || affectSpell->SpellFamilyName != SpellFamilyName)
+        return false;
+
+    // true
+    if (mod->mask & SpellFamilyFlags)
+        return true;
+
+    return false;
+}*/
+
+bool SpellInfo::CanPierceImmuneAura(SpellInfo const* aura) const
+{
+    // these spells pierce all avalible spells (Resurrection Sickness for example)
+    if (Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+        return true;
+
+    // these spells (Cyclone for example) can pierce all...         // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
+    if ((AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) && !(aura && (aura->Mechanic == MECHANIC_IMMUNE_SHIELD || aura->Mechanic == MECHANIC_INVULNERABILITY || aura->Mechanic == MECHANIC_BANISH)))
+        return true;
+
+    return false;
+}
+
+bool SpellInfo::CanDispelAura(SpellInfo const* aura) const
+{
+    // These spells (like Mass Dispel) can dispell all auras, except death persistent ones (like Dungeon and Battleground Deserter)
+    if (Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY && !aura->IsDeathPersistent())
+        return true;
+
+    // These auras (like Divine Shield) can't be dispelled
+    if (aura->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+        return false;
+
+    // These auras (Cyclone for example) are not dispelable
+    if (aura->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)
+        return false;
+
+    return true;
+}
+
+bool SpellInfo::IsSingleTarget() const
+{
+    // all other single target spells have if it has AttributesEx5
+    if (AttributesEx5 & SPELL_ATTR_EX5_SINGLE_TARGET_SPELL)
+        return true;
+
+    switch (GetSpellSpecific())
+    {
+        case SPELL_SPECIFIC_JUDGEMENT:
+            return true;
+        default:
+            break;
+    }
+
+    return false;
+}
+
+bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
+{
+    SpellSpecificType spellSpec1 = GetSpellSpecific();
+    SpellSpecificType spellSpec2 = spellInfo->GetSpellSpecific();
+    switch (spellSpec1)
+    {
+        case SPELL_SPECIFIC_TRACKER:
+        case SPELL_SPECIFIC_WARLOCK_ARMOR:
+        case SPELL_SPECIFIC_MAGE_ARMOR:
+        case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
+        case SPELL_SPECIFIC_MAGE_POLYMORPH:
+        case SPELL_SPECIFIC_PRESENCE:
+        case SPELL_SPECIFIC_CHARM:
+        case SPELL_SPECIFIC_SCROLL:
+        case SPELL_SPECIFIC_WARRIOR_ENRAGE:
+        case SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE:
+        case SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT:
+            return spellSpec1 == spellSpec2;
+        case SPELL_SPECIFIC_FOOD:
+            return spellSpec2 == SPELL_SPECIFIC_FOOD
+                || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+        case SPELL_SPECIFIC_DRINK:
+            return spellSpec2 == SPELL_SPECIFIC_DRINK
+                || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+        case SPELL_SPECIFIC_FOOD_AND_DRINK:
+            return spellSpec2 == SPELL_SPECIFIC_FOOD
+                || spellSpec2 == SPELL_SPECIFIC_DRINK
+                || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+        default:
+            return false;
+    }
+}
+
+bool SpellInfo::IsAuraExclusiveBySpecificPerCasterWith(SpellInfo const* spellInfo) const
+{
+    SpellSpecificType spellSpec = GetSpellSpecific();
+    switch (spellSpec)
+    {
+        case SPELL_SPECIFIC_SEAL:
+        case SPELL_SPECIFIC_HAND:
+        case SPELL_SPECIFIC_AURA:
+        case SPELL_SPECIFIC_STING:
+        case SPELL_SPECIFIC_CURSE:
+        case SPELL_SPECIFIC_ASPECT:
+        case SPELL_SPECIFIC_JUDGEMENT:
+        case SPELL_SPECIFIC_WARLOCK_CORRUPTION:
+            return spellSpec == spellInfo->GetSpellSpecific();
+        default:
+            return false;
+    }
+}

@@ -308,39 +308,39 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
     SPELL_ATTR_EX_CANT_REFLECTED               = 0x00000008,// 3 used for detect can or not spell reflected
-    SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4
+    SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4 stealth and whirlwind
     SPELL_ATTR_EX_NOT_BREAK_STEALTH            = 0x00000020,// 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
     SPELL_ATTR_EX_NEGATIVE                     = 0x00000080,// 7
     SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET         = 0x00000100,// 8 Spell req target not to be in combat state
-    SPELL_ATTR_EX_UNK9                         = 0x00000200,// 9
+    SPELL_ATTR_EX_MELEE_COMBAT_START           = 0x00000200,// 9 player starts melee combat after this spell is cast
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
-    SPELL_ATTR_EX_UNK11                        = 0x00000800,// 11
-    SPELL_ATTR_EX_UNK12                        = 0x00001000,// 12
+    SPELL_ATTR_EX_UNK11                        = 0x00000800,// 11 aura
+    SPELL_ATTR_EX_IS_PICKPOCKET                = 0x00001000,// 12 pickpocket
     SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,// 13 related to farsight
-    SPELL_ATTR_EX_UNK14                        = 0x00004000,// 14
+    SPELL_ATTR_EX_CHANNEL_TRACK_TARGET         = 0x00004000,// 14 Client automatically forces player to face target when channeling
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,// 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,// 16 unaffected by school immunity
-    SPELL_ATTR_EX_UNK17                        = 0x00020000,// 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
-    SPELL_ATTR_EX_UNK18                        = 0x00040000,// 18
-    SPELL_ATTR_EX_UNK19                        = 0x00080000,// 19
+    SPELL_ATTR_EX_UNAUTOCASTABLE_BY_PET        = 0x00020000,// 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
+    SPELL_ATTR_EX_UNK18                        = 0x00040000,// 18 stun, polymorph, daze, hex
+    SPELL_ATTR_EX_CANT_TARGET_SELF             = 0x00080000,// 19
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,// 20 Req combo points on target
     SPELL_ATTR_EX_UNK21                        = 0x00200000,// 21
     SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,// 22 Use combo points (in 4.x not required combo point target selected)
     SPELL_ATTR_EX_UNK23                        = 0x00800000,// 23
-    SPELL_ATTR_EX_UNK24                        = 0x01000000,// 24 Req fishing pole??
+    SPELL_ATTR_EX_IS_FISHING                   = 0x01000000,// 24 Req fishing pole??
     SPELL_ATTR_EX_UNK25                        = 0x02000000,// 25 not set in 2.4.2
     SPELL_ATTR_EX_UNK26                        = 0x04000000,// 26
     SPELL_ATTR_EX_UNK27                        = 0x08000000,// 27
-    SPELL_ATTR_EX_UNK28                        = 0x10000000,// 28
-    SPELL_ATTR_EX_UNK29                        = 0x20000000,// 29
-    SPELL_ATTR_EX_UNK30                        = 0x40000000,// 30 overpower
+    SPELL_ATTR_EX_DONT_DISPLAY_IN_AURA_BAR     = 0x10000000,// 28 Not shown in aura bar
+    SPELL_ATTR_EX_CHANNEL_DISPLAY_SPELL_NAME   = 0x20000000,// 29 spell name is displayed in cast bar instead of 'channeling' text
+    SPELL_ATTR_EX_ENABLE_AT_DODGE              = 0x40000000,// 30 overpower
     SPELL_ATTR_EX_UNK31                        = 0x80000000,// 31
 };
 
 enum SpellAttributesEx2
 {
-    SPELL_ATTR_EX2_UNK0                        = 0x00000001,// 0
+    SPELL_ATTR_EX2_CAN_TARGET_DEAD             = 0x00000001,// 0 can target dead unit or corpse
     SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1
     SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3) // changed meaning from ? used for detect can or not spell reflected
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
@@ -376,38 +376,38 @@ enum SpellAttributesEx2
 
 enum SpellAttributesEx3
 {
-    SPELL_ATTR_EX3_UNK0                        = 0x00000001,// 0
-    SPELL_ATTR_EX3_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX3_UNK2                        = 0x00000004,// 2
-    SPELL_ATTR_EX3_UNK3                        = 0x00000008,// 3
-    SPELL_ATTR_EX3_UNK4                        = 0x00000010,// 4 Druid Rebirth only this spell have this flag
-    SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
-    SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX3_UNK7                        = 0x00000080,// 7 create a separate (de)buff stack for each caster
-    SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
-    SPELL_ATTR_EX3_UNK9                        = 0x00000200,// 9
-    SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
-    SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
-    SPELL_ATTR_EX3_CAST_ON_DEAD                = 0x00001000,// 12 target is a dead player (not every spell has this flag)
-    SPELL_ATTR_EX3_UNK13                       = 0x00002000,// 13
-    SPELL_ATTR_EX3_UNK14                       = 0x00004000,// 14 "Honorless Target" only this spells have this flag
-    SPELL_ATTR_EX3_UNK15                       = 0x00008000,// 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
-    SPELL_ATTR_EX3_UNK16                       = 0x00010000,// 16 no triggers effects that trigger on casting a spell??
-    SPELL_ATTR_EX3_NO_INITIAL_AGGRO            = 0x00020000,// 17 Causes no aggro if not missed
-    SPELL_ATTR_EX3_CANT_MISS                   = 0x00040000,// 18 Spell should always hit its target
-    SPELL_ATTR_EX3_UNK19                       = 0x00080000,// 19
-    SPELL_ATTR_EX3_DEATH_PERSISTENT            = 0x00100000,// 20 Death persistent spells
-    SPELL_ATTR_EX3_UNK21                       = 0x00200000,// 21
-    SPELL_ATTR_EX3_REQ_WAND                    = 0x00400000,// 22 Req wand
-    SPELL_ATTR_EX3_UNK23                       = 0x00800000,// 23
-    SPELL_ATTR_EX3_REQ_OFFHAND                 = 0x01000000,// 24 Req offhand weapon
-    SPELL_ATTR_EX3_UNK25                       = 0x02000000,// 25 no cause spell pushback ?
-    SPELL_ATTR_EX3_UNK26                       = 0x04000000,// 26
-    SPELL_ATTR_EX3_UNK27                       = 0x08000000,// 27
-    SPELL_ATTR_EX3_UNK28                       = 0x10000000,// 28
-    SPELL_ATTR_EX3_UNK29                       = 0x20000000,// 29
-    SPELL_ATTR_EX3_UNK30                       = 0x40000000,// 30
-    SPELL_ATTR_EX3_UNK31                       = 0x80000000,// 31
+    SPELL_ATTR_EX3_UNK0                         = 0x00000001,// 0
+    SPELL_ATTR_EX3_UNK1                         = 0x00000002,// 1
+    SPELL_ATTR_EX3_UNK2                         = 0x00000004,// 2
+    SPELL_ATTR_EX3_BLOCKABLE_SPELL              = 0x00000008,// 3 Only dmg class melee in 3.1.3
+    SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER    = 0x00000010,// 4 you don't have to wait to be resurrected with these spells
+    SPELL_ATTR_EX3_UNK5                         = 0x00000020,// 5
+    SPELL_ATTR_EX3_UNK6                         = 0x00000040,// 6
+    SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS       = 0x00000080,// 7 create a separate (de)buff stack for each caster
+    SPELL_ATTR_EX3_TARGET_ONLY_PLAYER           = 0x00000100,// 8 Can target only player
+    SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_PROC_2 = 0x00000200,// 9
+    SPELL_ATTR_EX3_MAIN_HAND                    = 0x00000400,// 10 Main hand weapon required
+    SPELL_ATTR_EX3_BATTLEGROUND                 = 0x00000800,// 11 Can casted only on battleground
+    SPELL_ATTR_EX3_CAST_ON_DEAD                 = 0x00001000,// 12 target is a dead player (not every spell has this flag)
+    SPELL_ATTR_EX3_DONT_DISPLAY_CHANNEL_BAR     = 0x00002000,// 13 Clientside attribute - will not display channeling bar
+    SPELL_ATTR_EX3_IS_HONORLESS_TARGET          = 0x00004000,// 14 "Honorless Target" only this spells have this flag
+    SPELL_ATTR_EX3_UNK15                        = 0x00008000,// 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
+    SPELL_ATTR_EX3_CANT_TRIGGER_PROC            = 0x00010000,// 16 no triggers effects that trigger on casting a spell??
+    SPELL_ATTR_EX3_NO_INITIAL_AGGRO             = 0x00020000,// 17 Causes no aggro if not missed
+    SPELL_ATTR_EX3_CANT_MISS                    = 0x00040000,// 18 Spell should always hit its target
+    SPELL_ATTR_EX3_DISABLE_PROC                 = 0x00080000,// 19 during aura proc no spells can trigger (20178, 20375)
+    SPELL_ATTR_EX3_DEATH_PERSISTENT             = 0x00100000,// 20 Death persistent spells
+    SPELL_ATTR_EX3_UNK21                        = 0x00200000,// 21
+    SPELL_ATTR_EX3_REQ_WAND                     = 0x00400000,// 22 Req wand
+    SPELL_ATTR_EX3_UNK23                        = 0x00800000,// 23
+    SPELL_ATTR_EX3_REQ_OFFHAND                  = 0x01000000,// 24 Req offhand weapon
+    SPELL_ATTR_EX3_UNK25                        = 0x02000000,// 25 no cause spell pushback ?
+    SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED      = 0x04000000,// 26 auras with this attribute can proc from triggered spell casts with SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_PROC_2 (67736 + 52999)
+    SPELL_ATTR_EX3_DRAIN_SOUL                   = 0x08000000,// 27 only drain soul has this flag
+    SPELL_ATTR_EX3_UNK28                        = 0x10000000,// 28
+    SPELL_ATTR_EX3_NO_DONE_BONUS                = 0x20000000,// 29 Ignore caster spellpower and done damage mods? client doesn't apply spellmods for those spells
+    SPELL_ATTR_EX3_DONT_DISPLAY_RANGE           = 0x40000000,// 30 client doesn't display range in tooltip for those spells
+    SPELL_ATTR_EX3_UNK31                        = 0x80000000,// 31
 };
 
 enum SpellAttributesEx4
@@ -448,38 +448,38 @@ enum SpellAttributesEx4
 
 enum SpellAttributesEx5
 {
-    SPELL_ATTR_EX5_UNK0                        = 0x00000001,// 0
-    SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP       = 0x00000002,// 1 not need reagents if UNIT_FLAG_PREPARATION
-    SPELL_ATTR_EX5_UNK2                        = 0x00000004,// 2 removed at enter arena (e.g. 31850 since 3.3.3)
-    SPELL_ATTR_EX5_USABLE_WHILE_STUNNED        = 0x00000008,// 3 usable while stunned
-    SPELL_ATTR_EX5_UNK4                        = 0x00000010,// 4
-    SPELL_ATTR_EX5_SINGLE_TARGET_SPELL         = 0x00000020,// 5 Only one target can be apply at a time
-    SPELL_ATTR_EX5_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX5_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX5_UNK8                        = 0x00000100,// 8
-    SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY     = 0x00000200,// 9  begin periodic tick at aura apply
-    SPELL_ATTR_EX5_UNK10                       = 0x00000400,// 10
-    SPELL_ATTR_EX5_UNK11                       = 0x00000800,// 11
-    SPELL_ATTR_EX5_UNK12                       = 0x00001000,// 12
-    SPELL_ATTR_EX5_UNK13                       = 0x00002000,// 13 haste affects duration (e.g. 8050 since 3.3.3)
-    SPELL_ATTR_EX5_UNK14                       = 0x00004000,// 14
-    SPELL_ATTR_EX5_UNK15                       = 0x00008000,// 15
-    SPELL_ATTR_EX5_UNK16                       = 0x00010000,// 16
-    SPELL_ATTR_EX5_USABLE_WHILE_FEARED         = 0x00020000,// 17 usable while feared
-    SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED       = 0x00040000,// 18 usable while confused
-    SPELL_ATTR_EX5_UNK19                       = 0x00080000,// 19
-    SPELL_ATTR_EX5_UNK20                       = 0x00100000,// 20
-    SPELL_ATTR_EX5_UNK21                       = 0x00200000,// 21
-    SPELL_ATTR_EX5_UNK22                       = 0x00400000,// 22
-    SPELL_ATTR_EX5_UNK23                       = 0x00800000,// 23
-    SPELL_ATTR_EX5_UNK24                       = 0x01000000,// 24
-    SPELL_ATTR_EX5_UNK25                       = 0x02000000,// 25
-    SPELL_ATTR_EX5_UNK26                       = 0x04000000,// 26
-    SPELL_ATTR_EX5_UNK27                       = 0x08000000,// 27
-    SPELL_ATTR_EX5_UNK28                       = 0x10000000,// 28
-    SPELL_ATTR_EX5_UNK29                       = 0x20000000,// 29
-    SPELL_ATTR_EX5_UNK30                       = 0x40000000,// 30
-    SPELL_ATTR_EX5_UNK31                       = 0x80000000,// 31 Forces all nearby enemies to focus attacks caster
+    SPELL_ATTR_EX5_UNK0                             = 0x00000001,// 0
+    SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP            = 0x00000002,// 1 not need reagents if UNIT_FLAG_PREPARATION
+    SPELL_ATTR_EX5_UNK2                             = 0x00000004,// 2 removed at enter arena (e.g. 31850 since 3.3.3)
+    SPELL_ATTR_EX5_USABLE_WHILE_STUNNED             = 0x00000008,// 3 usable while stunned
+    SPELL_ATTR_EX5_UNK4                             = 0x00000010,// 4
+    SPELL_ATTR_EX5_SINGLE_TARGET_SPELL              = 0x00000020,// 5 Only one target can be apply at a time
+    SPELL_ATTR_EX5_UNK6                             = 0x00000040,// 6
+    SPELL_ATTR_EX5_UNK7                             = 0x00000080,// 7
+    SPELL_ATTR_EX5_UNK8                             = 0x00000100,// 8
+    SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY          = 0x00000200,// 9  begin periodic tick at aura apply
+    SPELL_ATTR_EX5_HIDE_DURATION                    = 0x00000400,// 10 do not send duration to client
+    SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET = 0x00000800,// 11 uses target's target as target if original target not valid (intervene for example)
+    SPELL_ATTR_EX5_UNK12                            = 0x00001000,// 12 Cleave related?
+    SPELL_ATTR_EX5_HASTE_AFFECT_DURATION            = 0x00002000,// 13 haste affects duration (e.g. 8050 since 3.3.3)
+    SPELL_ATTR_EX5_UNK14                            = 0x00004000,// 14
+    SPELL_ATTR_EX5_UNK15                            = 0x00008000,// 15 Inflits on multiple targets?
+    SPELL_ATTR_EX5_SPECIAL_ITEM_CLASS_CHECK         = 0x00010000,// 16 this allows spells with EquippedItemClass to affect spells from other items if the required item is equipped
+    SPELL_ATTR_EX5_USABLE_WHILE_FEARED              = 0x00020000,// 17 usable while feared
+    SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED            = 0x00040000,// 18 usable while confused
+    SPELL_ATTR_EX5_DONT_TURN_DURING_CAST            = 0x00080000,// 19 Blocks caster's turning when casting (client does not automatically turn caster's model to face UNIT_FIELD_TARGET)
+    SPELL_ATTR_EX5_UNK20                            = 0x00100000,// 20
+    SPELL_ATTR_EX5_UNK21                            = 0x00200000,// 21
+    SPELL_ATTR_EX5_UNK22                            = 0x00400000,// 22
+    SPELL_ATTR_EX5_UNK23                            = 0x00800000,// 23
+    SPELL_ATTR_EX5_UNK24                            = 0x01000000,// 24
+    SPELL_ATTR_EX5_UNK25                            = 0x02000000,// 25
+    SPELL_ATTR_EX5_UNK26                            = 0x04000000,// 26 aoe related - Boulder, Cannon, Corpse Explosion, Fire Nova, Flames, Frost Bomb, Living Bomb, Seed of Corruption, Starfall, Thunder Clap, Volley
+    SPELL_ATTR_EX5_DONT_SHOW_AURA_IF_SELF_CAST      = 0x08000000,// 27 Auras with this attribute are not visible on units that are the caster
+    SPELL_ATTR_EX5_DONT_SHOW_AURA_IF_NOT_SELF_CAST  = 0x10000000,// 28 Auras with this attribute are not visible on units that are not the caster
+    SPELL_ATTR_EX5_UNK29                            = 0x20000000,// 29
+    SPELL_ATTR_EX5_UNK30                            = 0x40000000,// 30
+    SPELL_ATTR_EX5_UNK31                            = 0x80000000,// 31 Forces all nearby enemies to focus attacks caster
 };
 
 enum SpellAttributesEx6
@@ -520,38 +520,38 @@ enum SpellAttributesEx6
 
 enum SpellAttributesEx7
 {
-    SPELL_ATTR_EX7_UNK0                        = 0x00000001,// 0
-    SPELL_ATTR_EX7_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX7_PALADIN_AURA                = 0x00000004,// 2
-    SPELL_ATTR_EX7_UNK3                        = 0x00000008,// 3
-    SPELL_ATTR_EX7_UNK4                        = 0x00000010,// 4
-    SPELL_ATTR_EX7_TOTEM_SPELL                 = 0x00000020,// 5  shaman summon totem spells
-    SPELL_ATTR_EX7_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX7_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX7_UNK8                        = 0x00000100,// 8
-    SPELL_ATTR_EX7_UNK9                        = 0x00000200,// 9
-    SPELL_ATTR_EX7_UNK10                       = 0x00000400,// 10
-    SPELL_ATTR_EX7_UNK11                       = 0x00000800,// 11
-    SPELL_ATTR_EX7_UNK12                       = 0x00001000,// 12
-    SPELL_ATTR_EX7_UNK13                       = 0x00002000,// 13
-    SPELL_ATTR_EX7_UNK14                       = 0x00004000,// 14
-    SPELL_ATTR_EX7_UNK15                       = 0x00008000,// 15
-    SPELL_ATTR_EX7_UNK16                       = 0x00010000,// 16
-    SPELL_ATTR_EX7_UNK17                       = 0x00020000,// 17
-    SPELL_ATTR_EX7_UNK18                       = 0x00040000,// 18
-    SPELL_ATTR_EX7_UNK19                       = 0x00080000,// 19
-    SPELL_ATTR_EX7_UNK20                       = 0x00100000,// 20
-    SPELL_ATTR_EX7_UNK21                       = 0x00200000,// 21
+    SPELL_ATTR_EX7_UNK0                        = 0x00000001,// 0 Shaman's new spells (Call of the ...), Feign Death.
+    SPELL_ATTR_EX7_IGNORE_DURATION_MODS        = 0x00000002,// 1 Duration is not affected by duration modifiers
+    SPELL_ATTR_EX7_REACTIVATE_AT_RESURRECT     = 0x00000004,// 2 Paladin's auras and 65607 only.
+    SPELL_ATTR_EX7_IS_CHEAT_SPELL              = 0x00000008,// 3 Cannot cast if caster doesn't have UnitFlag2 & UNIT_FLAG2_ALLOW_CHEAT_SPELLS
+    SPELL_ATTR_EX7_UNK4                        = 0x00000010,// 4 Only 47883 (Soulstone Resurrection) and test spell.
+    SPELL_ATTR_EX7_SUMMON_PLAYER_TOTEM         = 0x00000020,// 5 Only Shaman player totems.
+    SPELL_ATTR_EX7_NO_PUSHBACK_ON_DAMAGE       = 0x00000040,// 6 Does not cause spell pushback on damage
+    SPELL_ATTR_EX7_UNK7                        = 0x00000080,// 7 66218 (Launch) spell.
+    SPELL_ATTR_EX7_HORDE_ONLY                  = 0x00000100,// 8 Teleports, mounts and other spells.
+    SPELL_ATTR_EX7_ALLIANCE_ONLY               = 0x00000200,// 9 Teleports, mounts and other spells.
+    SPELL_ATTR_EX7_DISPEL_CHARGES              = 0x00000400,// 10 Dispel and Spellsteal individual charges instead of whole aura.
+    SPELL_ATTR_EX7_INTERRUPT_ONLY_NONPLAYER    = 0x00000800,// 11 Only non-player casts interrupt, though Feral Charge - Bear has it.
+    SPELL_ATTR_EX7_UNK12                       = 0x00001000,// 12 Not set in 3.2.2a.
+    SPELL_ATTR_EX7_UNK13                       = 0x00002000,// 13 Not set in 3.2.2a.
+    SPELL_ATTR_EX7_UNK14                       = 0x00004000,// 14 Only 52150 (Raise Dead - Pet) spell.
+    SPELL_ATTR_EX7_UNK15                       = 0x00008000,// 15 Exorcism. Usable on players? 100% crit chance on undead and demons?
+    SPELL_ATTR_EX7_CAN_RESTORE_SECONDARY_POWER = 0x00010000,// 16 These spells can replenish a powertype, which is not the current powertype.
+    SPELL_ATTR_EX7_UNK17                       = 0x00020000,// 17 Only 27965 (Suicide) spell.
+    SPELL_ATTR_EX7_HAS_CHARGE_EFFECT           = 0x00040000,// 18 Only spells that have Charge among effects.
+    SPELL_ATTR_EX7_ZONE_TELEPORT               = 0x00080000,// 19 Teleports to specific zones.
+    SPELL_ATTR_EX7_UNK20                       = 0x00100000,// 20 Blink, Divine Shield, Ice Block
+    SPELL_ATTR_EX7_UNK21                       = 0x00200000,// 21 Not set.
     SPELL_ATTR_EX7_UNK22                       = 0x00400000,// 22
-    SPELL_ATTR_EX7_UNK23                       = 0x00800000,// 23
-    SPELL_ATTR_EX7_UNK24                       = 0x01000000,// 24
+    SPELL_ATTR_EX7_UNK23                       = 0x00800000,// 23 Motivate, Mutilate, Shattering Throw
+    SPELL_ATTR_EX7_UNK24                       = 0x01000000,// 24 Motivate, Mutilate, Perform Speech, Shattering Throw
     SPELL_ATTR_EX7_UNK25                       = 0x02000000,// 25
     SPELL_ATTR_EX7_UNK26                       = 0x04000000,// 26
-    SPELL_ATTR_EX7_UNK27                       = 0x08000000,// 27
-    SPELL_ATTR_EX7_UNK28                       = 0x10000000,// 28
-    SPELL_ATTR_EX7_UNK29                       = 0x20000000,// 29
-    SPELL_ATTR_EX7_UNK30                       = 0x40000000,// 30
-    SPELL_ATTR_EX7_UNK31                       = 0x80000000,// 31
+    SPELL_ATTR_EX7_UNK27                       = 0x08000000,// 27 Not set
+    SPELL_ATTR_EX7_CONSOLIDATED_RAID_BUFF      = 0x10000000,// 28 May be collapsed in raid buff frame (clientside attribute)
+    SPELL_ATTR_EX7_UNK29                       = 0x20000000,// 29 Only 69028, 71237
+    SPELL_ATTR_EX7_UNK30                       = 0x40000000,// 30 Burning Determination, Divine Sacrifice, Earth Shield, Prayer of Mending
+    SPELL_ATTR_EX7_CLIENT_INDICATOR            = 0x80000000,// 31
 };
 
 #define MAX_TALENT_SPEC_COUNT   2
