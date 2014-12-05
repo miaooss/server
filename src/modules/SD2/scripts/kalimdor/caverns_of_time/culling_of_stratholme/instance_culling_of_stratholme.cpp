@@ -32,8 +32,8 @@ enum
     MAX_ARTHAS_SPAWN_POS        = 5,
     MAX_GRAIN_CRATES            = 5,
     MAX_SCOURGE_SPAWN_POS       = 5,
+    MAX_BURNING_SCOURGE_POS     = 15,
     
-    SAY_CHROMIE_HURRY           = -1000000,                         // TODO
     SAY_SCOURGE_FESTIVAL_LANE   = -1595003,
     SAY_SCOURGE_KINGS_SQUARE    = -1595004,
     SAY_SCOURGE_MARKET_ROW      = -1595005,
@@ -41,9 +41,11 @@ enum
     SAY_SCOURGE_ELDERS_SQUARE   = -1595007,
     
     SAY_MEET_TOWN_HALL          = -1595008,
+    SAY_CORRUPTOR_DESPAWN       = -1595041,
 
     WHISPER_CHROMIE_CRATES      = -1595001,
     WHISPER_CHROMIE_GUARDIAN    = -1595002,
+    WHISPER_CHROMIE_HURRY       = -1000000,                         // TODO
     
     SPELL_CORRUPTION_OF_TIME    = 60422,                            // triggers 60451
 };
@@ -58,8 +60,8 @@ static sSpawnLocation m_aArthasSpawnLocs[] =                // need tuning
     {1957.13f, 1287.43f, 145.65f, 2.96f},                   // bridge
     {2091.99f, 1277.25f, 140.47f, 0.43f},                   // city entrance
     {2366.24f, 1195.25f, 132.04f, 3.15f},                   // town hall
-    {2534.46f, 1125.99f, 130.75f, 0.27f},
-    {2363.77f, 1406.31f, 128.64f, 3.23f}
+    {2534.98f, 1126.16f, 130.86f, 2.84f},                   // burning stratholme
+    {2363.44f, 1404.90f, 128.64f, 2.77f},                   // crusader square gate
 };
 
 static sSpawnLocation m_aIntroActorsSpawnLocs[] =
@@ -105,6 +107,31 @@ static sScourgeSpawnLoc m_aScourgeWavesLocs[] =
     {POS_MARKET_ROW,    SAY_SCOURGE_MARKET_ROW,     2219.825f, 1331.119f, 127.978f, 3.08f},
     {POS_TOWN_HALL,     SAY_SCOURGE_TOWN_HALL,      2351.475f, 1211.893f, 130.361f, 4.50f},
     {POS_ELDERS_SQUARE, SAY_SCOURGE_ELDERS_SQUARE,  2259.153f, 1153.199f, 138.431f, 2.39f},
+};
+
+struct sBurningScourgeSpawnLoc
+{
+    uint8 m_uiType;
+    float m_fX, m_fY, m_fZ;
+};
+
+static sBurningScourgeSpawnLoc m_aBurningScourgeLocs[MAX_BURNING_SCOURGE_POS] =
+{
+    {SCOURGE_TYPE_GHOUL, 2571.570f, 1169.945f, 126.191f},
+    {SCOURGE_TYPE_GOLEM, 2560.524f, 1208.296f, 125.613f},
+    {SCOURGE_TYPE_GHOUL, 2562.075f, 1182.137f, 126.499f},
+    {SCOURGE_TYPE_FIEND, 2552.720f, 1227.233f, 125.620f},
+    {SCOURGE_TYPE_GHOUL, 2545.070f, 1245.650f, 125.991f},
+    {SCOURGE_TYPE_GHOUL, 2534.250f, 1258.379f, 127.030f},
+    {SCOURGE_TYPE_ACOLYTES, 2532.075f, 1271.579f, 127.243f},
+    {SCOURGE_TYPE_GHOUL, 2529.144f, 1281.680f, 128.429f},
+    {SCOURGE_TYPE_GHOUL, 2491.742f, 1365.169f, 130.827f},
+    {SCOURGE_TYPE_FIEND, 2490.869f, 1366.189f, 130.678f},
+    {SCOURGE_TYPE_GHOUL, 2479.944f, 1393.666f, 129.975f},
+    {SCOURGE_TYPE_GOLEM, 2484.858f, 1380.665f, 130.075f},
+    {SCOURGE_TYPE_GHOUL, 2474.965f, 1399.063f, 130.317f},
+    {SCOURGE_TYPE_ACOLYTES, 2461.411f, 1416.090f, 130.663f},
+    {SCOURGE_TYPE_GHOUL, 2448.391f, 1426.428f, 130.853f},
 };
 
 instance_culling_of_stratholme::instance_culling_of_stratholme(Map* pMap) : ScriptedInstance(pMap),
@@ -206,6 +233,8 @@ void instance_culling_of_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_PATRICIA_O_REILLY:
         case NPC_LORDAERON_CRIER:
         case NPC_INFINITE_CORRUPTER:
+        case NPC_LORD_EPOCH:
+        case NPC_MALGANIS:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
@@ -237,7 +266,7 @@ void instance_culling_of_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_DARK_NECROMANCER:
         case NPC_BILE_GOLEM:
         case NPC_DEVOURING_GHOUL:
-            if (pCreature->IsTemporarySummon())
+            if (pCreature->IsTemporarySummon() && GetData(TYPE_SALRAMM_EVENT) != DONE)
                 m_luiCurrentScourgeWaveGUIDs.push_back(pCreature->GetObjectGuid());
             break;
     }
@@ -253,6 +282,7 @@ void instance_culling_of_stratholme::OnObjectCreate(GameObject* pGo)
             break;
         case GO_DARK_RUNED_CHEST:
         case GO_DARK_RUNED_CHEST_H:
+        case GO_CITY_ENTRANCE_GATE:
             break;
 
         default:
@@ -296,11 +326,6 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
                 SetData(TYPE_MEATHOOK_EVENT, IN_PROGRESS);
             }
             break;
-        case TYPE_ARTHAS_ESCORT_EVENT:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == FAIL)
-                m_uiArthasRespawnTimer = 10000;
-            break;
         case TYPE_MEATHOOK_EVENT:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
@@ -314,13 +339,41 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 m_uiScourgeWaveTimer = 5000;
             break;
+        case TYPE_ARTHAS_TOWNHALL_EVENT:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                // despawn arthas and spawn him in the next point
+                if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+                    { pArthas->ForcedDespawn(); }
+                    
+                if (Player* pPlayer = GetPlayerInMap())
+                    { DoSpawnArthasIfNeeded(pPlayer); }
+            }
+            break;
         case TYPE_EPOCH_EVENT:
             m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_ARTHAS_ESCORT_EVENT:
+            // use fail in order to respawn Arthas
+            if (uiData == FAIL)
+            {
+                m_uiArthasRespawnTimer = 10000;
+                
+                // despawn the bosses if Arthas dies in order to avoid exploits
+                if (Creature* pEpoch = GetSingleCreatureFromStorage(NPC_LORD_EPOCH, true))
+                    { pEpoch->ForcedDespawn(); }
+                if (Creature* pMalganis = GetSingleCreatureFromStorage(NPC_MALGANIS, true))
+                    { pMalganis->ForcedDespawn(); }
+            }
+            else
+                { m_auiEncounter[uiType] = uiData; }
             break;
         case TYPE_MALGANIS_EVENT:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
             {
+                DoUseDoorOrButton(GO_CITY_ENTRANCE_GATE);
                 DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_DARK_RUNED_CHEST : GO_DARK_RUNED_CHEST_H, GO_FLAG_NO_INTERACT, false);
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_DARK_RUNED_CHEST : GO_DARK_RUNED_CHEST_H, 30 * MINUTE);
 
@@ -359,13 +412,15 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
                     SetData(TYPE_INFINITE_CORRUPTER_TIME, 0);
                     break;
                 case SPECIAL:
-                    DoChromieWhisper(SAY_CHROMIE_HURRY);
+                    DoChromieWhisper(WHISPER_CHROMIE_HURRY);
                     break;
                 case FAIL:
                     // event failed - despawn the corruptor
                     SetData(TYPE_INFINITE_CORRUPTER_TIME, 0);
                     if (Creature* pCorrupter = GetSingleCreatureFromStorage(NPC_INFINITE_CORRUPTER))
                     {
+                        DoOrSimulateScriptTextForThisInstance(SAY_CORRUPTOR_DESPAWN, NPC_INFINITE_CORRUPTER);
+                        
                         if (pCorrupter->IsAlive())
                             pCorrupter->ForcedDespawn();
                     }
@@ -374,14 +429,15 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
             break;
     }
 
-    if (uiData == DONE || uiData == FAIL || uiType == TYPE_INFINITE_CORRUPTER_TIME)
+    if (uiData == DONE || uiType == TYPE_INFINITE_CORRUPTER_TIME)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                   << m_auiEncounter[9];
 
         m_strInstData = saveStream.str();
 
@@ -402,6 +458,11 @@ void instance_culling_of_stratholme::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_MEATHOOK:                 SetData(TYPE_MEATHOOK_EVENT, DONE); break;
+        case NPC_SALRAMM_THE_FLESHCRAFTER: SetData(TYPE_SALRAMM_EVENT, DONE);  break;
+        case NPC_LORD_EPOCH:               SetData(TYPE_EPOCH_EVENT, DONE);    break;
+        case NPC_INFINITE_CORRUPTER: SetData(TYPE_INFINITE_CORRUPTER, DONE);   break;
+        
         case NPC_ENRAGING_GHOUL:
         case NPC_ACOLYTE:
         case NPC_MASTER_NECROMANCER:
@@ -411,7 +472,7 @@ void instance_culling_of_stratholme::OnCreatureDeath(Creature* pCreature)
         case NPC_DARK_NECROMANCER:
         case NPC_BILE_GOLEM:
         case NPC_DEVOURING_GHOUL:
-            if (pCreature->IsTemporarySummon())
+            if (pCreature->IsTemporarySummon() && GetData(TYPE_SALRAMM_EVENT) != DONE)
             {
                 m_luiCurrentScourgeWaveGUIDs.remove(pCreature->GetObjectGuid());
 
@@ -435,7 +496,8 @@ void instance_culling_of_stratholme::Load(const char* chrIn)
 
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8];
+               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7] 
+               >> m_auiEncounter[8] >> m_auiEncounter[9];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
@@ -720,7 +782,7 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
     }
 
     // start infinite curruptor event on the first wave
-    if (m_uiScourgeWaveCount == 1 && !instance->IsRegularDifficulty())
+    if (m_uiScourgeWaveCount == 1 && !instance->IsRegularDifficulty() && GetData(TYPE_INFINITE_CORRUPTER) != DONE)
         SetData(TYPE_INFINITE_CORRUPTER, IN_PROGRESS);
 
     // get a random position that is different from the previous one for the next round
@@ -730,6 +792,46 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
         uiCurrentPos = urand(POS_FESTIVAL_LANE, POS_ELDERS_SQUARE);
 
     m_uiCurrentUndeadPos = uiCurrentPos;
+}
+
+// function that spawns all the scourge elites in burning stratholme
+void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
+{
+    for (uint8 i = 0; i < MAX_BURNING_SCOURGE_POS; ++i)
+    {
+        uint32 uiEntry = GetRandomMobOfType(m_aBurningScourgeLocs[i].m_uiType);
+        if (!uiEntry)
+            continue;
+
+        float fX, fY, fZ;
+
+        // special requirement for acolytes - spawn a pack of 3
+        if (m_aBurningScourgeLocs[i].m_uiType == SCOURGE_TYPE_ACOLYTES)
+        {
+            for (uint8 j = 0; j < 3; ++j)
+            {
+                pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 5.0f, fX, fY, fZ);
+
+                if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+            }
+        }
+        // spawn the selected mob
+        else
+        {
+            if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+        }
+
+        // spawn a few random zombies
+        for (uint8 j = 0; j < 5; ++j)
+        {
+            pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 20.0f, fX, fY, fZ);
+
+            if (Creature* pUndead = pSummoner->SummonCreature(NPC_ZOMBIE, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+        }
+    }
 }
 
 // function that returns a random scourge mob of a specified type

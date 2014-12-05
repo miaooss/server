@@ -1674,7 +1674,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3595006,'Chromie, you and I both know what\'s going to happen in this time stream. We\'ve seen this all before. Can you just skip us ahead to all the real action?','chromie GOSSIP_ITEM_INN_SKIP'),
 (-3595008,'Yes, my Prince. We are ready.','arthas GOSSIP_ITEM_CITY_GATES'),
-(-3595009,'We\'re only doing what is best for Lordaeron, your Highness.','arthas GOSSIP_ITEM_TOWN_HALL');
+(-3595009,'We\'re only doing what is best for Lordaeron, your Highness.','arthas GOSSIP_ITEM_TOWN_HALL'),
+(-3595010,'Lead the way, Prince Arthas','arthas GOSSIP_ITEM_TOWN_HALL_2'),
+(-3595011,'I\'m ready.','arthas GOSSIP_ITEM_EPOCH'),
+(-3595012,'For Lordaeron!','arthas GOSSIP_ITEM_ESCORT'),
+(-3595013,'I\'m ready to battle the dreadlord, sire.','arthas GOSSIP_ITEM_DREADLORD');
 
 -- -1 349 000 MARAUDON
 
@@ -3418,7 +3422,40 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1595005,'Scourge forces have been spotted near the Market Row Gate!',0,6,0,0,'lordaeron crier SAY_SCOURGE_MARKET_ROW'),
 (-1595006,'Scourge forces have been spotted near the Town Hall!',0,6,0,0,'lordaeron crier SAY_SCOURGE_TOWN_HALL'),
 (-1595007,'Scourge forces have been spotted near the Elder\'s Square Gate!',0,6,0,0,'lordaeron crier SAY_SCOURGE_ELDERS_SQUARE'),
-(-1595008,'Champions, meet me at the Town Hall at once. We must take the fight to Mal\'Ganis.',14297,6,0,0,'arthas SAY_MEET_TOWN_HALL');
+(-1595008,'Champions, meet me at the Town Hall at once. We must take the fight to Mal\'Ganis.',14297,6,0,0,'arthas SAY_MEET_TOWN_HALL'),
+(-1595009,'Follow me, I know the way through.',14298,0,0,1,'arthas SAY_FOLLOW'),
+(-1595010,'Ah, you\'ve finally arrived Prince Arthas. You\'re here just in the nick of time.',0,0,0,1,'citizen SAY_ARRIVED'),
+(-1595011,'Yes, I\'m glad I could get to you before the plague.',14299,0,0,0,'arthas SAY_GET_BEFORE_PLAGUE'),
+(-1595012,'What is this sorcery?',14300,0,0,0,'arthas SAY_SORCERY'),
+(-1595013,'There\'s no need for you to understand, Arthas. All you need to do is die.',0,0,0,1,'citizen SAY_NO_UNDERSTAND'),
+(-1595014,'Mal\'Ganis appears to have more than Scourge in his arsenal. We should make haste.',14301,0,0,1,'arthas SAY_MORE_THAN_SCOURGE'),
+(-1595015,'More vile sorcery! Be ready for anything!',14302,0,0,0,'arthas SAY_MORE_SORCERY'),
+(-1595016,'Let\'s move on.',14303,0,0,396,'arthas SAY_MOVE_ON'),
+(-1595017,'Watch your backs: they have us surrounded in this hall.',14304,0,0,1,'arthas SAY_WATCH_BACKS'),
+(-1595018,'Mal\'Ganis is not making this easy.',14305,0,0,396,'arthas SAY_NOT_EASY'),
+(-1595019,'They\'re very persistent.',14306,0,0,396,'arthas SAY_PERSISTENT'),
+(-1595020,'What else can he put in my way?',14307,0,0,396,'arthas SAY_ELSE'),
+(-1595021,'Prince Arthas Menethil, on this day, a powerful darkness has taken hold of your soul. The death you are destined to visit upon others will this day be your own.',13408,1,0,0,'chrono-lord SAY_DARKNESS'),
+(-1595022,'I do what I must for Lordaeron, and neither your words nor your actions will stop me.',14309,0,0,396,'arthas SAY_DO_WHAT_MUST'),
+(-1595023,'The quickest path to Mal\'Ganis lies behind that bookshelf ahead.',14308,0,0,0,'arthas SAY_QUICK_PATH'),
+(-1595024,'This will only take a moment.',14310,0,0,432,'arthas SAY_TAKE_A_MOMENT'),
+(-1595025,'I\'m relieved this secret passage still works.',14311,0,0,0,'arthas SAY_PASSAGE'),
+(-1595026,'Let\'s move through here as quickly as possible. If the undead don\'t kill us, the fires might.',14312,0,0,396,'arthas SAY_MOVE_QUICKLY'),
+(-1595027,'Rest a moment and clear your lungs, but we must move again soon.',14313,0,0,396,'arthas SAY_REST'),
+(-1595028,'That\'s enough; we must move again. Mal\'Ganis awaits.',14314,0,0,396,'arthas SAY_REST_COMPLETE'),
+(-1595029,'At last some good luck. Market Row has not caught fire yet. Mal\'Ganis is supposed to be in Crusaders\' Square, which is just ahead. Tell me when you\'re ready to move forward.',14315,0,0,396,'arthas SAY_CRUSADER_SQUARE'),
+(-1595030,'Justice will be done.',14316,0,0,0,'arthas SAY_JUSTICE'),
+(-1595031,'We\'re going to finish this right now, Mal\'Ganis. Just you... and me.',14317,0,0,5,'arthas SAY_FINISH_MALGANIS'),
+(-1595032,'Your journey has just begun, young prince. Gather your forces and meet me in the arctic land of Northrend. It is there that we shall settle the score between us. It is there that your true destiny will unfold.',14412,1,0,378,'malganis SAY_JOURNEY_BEGUN'),
+(-1595033,'I\'ll hunt you to the ends of the earth if I have to! Do you hear me? To the ends of the earth!',14318,0,0,0,'arthas SAY_HUNT_MALGANIS'),
+(-1595034,'You performed well this day. Anything that Mal\'Ganis has left behind is yours. Take it as your reward. I must now begin plans for an expedition to Northrend.',14319,0,0,1,'arthas SAY_ESCORT_COMPLETE'),
+(-1595035,'Protect your prince, soldiers of Lordaeron! I am in need of aid!',14320,0,0,0,'arthas SAY_HALF_HP'),
+(-1595036,'I am being overwhelmed, assist me!',14321,0,0,0,'arthas SAY_LOW_HP'),
+(-1595037,'Mal\'Ganis will pay for this.',14322,0,0,0,'arthas SAY_SLAY_1'),
+(-1595038,'I can\'t afford to spare you.',14323,0,0,0,'arthas SAY_SLAY_2'),
+(-1595039,'One less obstacle to deal with.',14324,0,0,0,'arthas SAY_SLAY_3'),
+(-1595040,'Agh! Damn you, Mal\'Ganis! Father...Jaina...I have failed Lordaeron...',14325,0,0,0,'arthas SAY_DEATH'),
+(-1595041,'My work here is finished!',0,6,0,0,'infinite corruptor SAY_CORRUPTOR_DESPAWN');
 
 -- -1 599 000 HALLS OF STONE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -4679,6 +4716,65 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1649075,'Champions, you\'re alive! Not only have you defeated every challenge of the Trial of the Crusader, but also thwarted Arthas\' plans! Your skill and cunning will prove to be a powerful weapon against the Scourge. Well done! Allow one of the Crusade\'s mages to transport you to the surface!',0,0,0,1,'tirion SAY_EPILOGUE');
 
 -- -1 650 000 TRIAL OF THE CHAMPION
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1650000,'The Silver Covenant is pleased to present their contenders for this event, Highlord.',0,1,0,396,'toc herald SAY_HORDE_CHALLENGE'),
+(-1650001,'Presenting the fierce Grand Champion of Orgrimmar, Mokra the Skullcrusher!',0,0,0,0,'toc herald SAY_HORDE_WARRIOR'),
+(-1650002,'Coming out of the gate is Eressea Dawnsinger, skilled mage and Grand Champion of Silvermoon!',0,0,0,0,'toc herald SAY_HORDE_MAGE'),
+(-1650003,'Tall in the saddle of his kodo, here is the venerable Runok Wildmane, Grand Champion of Thunder Bluff!',0,0,0,0,'toc herald SAY_HORDE_SHAMAN'),
+(-1650004,'Entering the arena is the lean and dangerous Zul\'tore, Grand Champion of Sen\'jin!',0,0,0,0,'toc herald SAY_HORDE_HUNTER'),
+(-1650005,'Representing the tenacity of the Forsaken, here is the Grand Champion of the Undercity, Deathstalker Visceri!',0,0,0,0,'toc herald SAY_HORDE_ROGUE'),
+
+(-1650006,'The Sunreavers are proud to present their representatives in this trial by combat.',0,1,0,396,'toc herald SAY_ALLIANCE_CHALLENGE'),
+(-1650007,'Proud and strong, give a cheer for Marshal Jacob Alerius, the Grand Champion of Stormwind!',0,0,0,0,'toc herald SAY_ALLIANCE_WARRIOR'),
+(-1650008,'Here comes the small but deadly Ambrose Boltspark, Grand Champion of Gnomeregan!',0,0,0,0,'toc herald SAY_ALLIANCE_MAGE'),
+(-1650009,'Coming out of the gate is Colosos, the towering Grand Champion of the Exodar!',0,0,0,0,'toc herald SAY_ALLIANCE_SHAMAN'),
+(-1650010,'Entering the arena is the Grand Champion of Darnassus, the skilled sentinel Jaelyne Evensong!',0,0,0,0,'toc herald SAY_ALLIANCE_HUNTER'),
+(-1650011,'The might of the dwarves is represented today by the Grand Champion of Ironforge, Lana Stouthammer!',0,0,0,0,'toc herald SAY_ALLIANCE_ROGUE'),
+
+(-1650012,'Welcome, champions. Today, before the eyes of your leaders and peers, you will prove yourselves worthy combatants.',0,1,0,1,'tirion SAY_TIRION_WELCOME'),
+(-1650013,'You will first be facing three of the Grand Champions of the Tournament! These fierce contenders have beaten out all others to reach the pinnacle of skill in the joust.',0,1,0,1,'tirion SAY_TIRION_FIRST_CHALLENGE'),
+(-1650014,'Fight well, Horde! Lok\'tar Ogar!',0,1,0,22,'thrall SAY_THRALL_ALLIANCE_CHALLENGE'),
+(-1650015,'Finally, a fight worth watching.',0,1,0,396,'garrosh SAY_GARROSH_ALLIANCE_CHALLENGE'),
+(-1650016,'I have no taste for these games, Tirion. Still... I trust they will perform admirably.',0,1,0,1,'king varian SAY_VARIAN_HORDE_CHALLENGE'),
+(-1650017,'Begin!',0,1,0,0,'tirion SAY_TIRION_CHAMPIONS_BEGIN'),
+(-1650018,'The blood elves of Silvermoon cheer for $n.',0,2,0,0,'raid spectator EMOTE_BLOOD_ELVES'),
+(-1650019,'The trolls of the Sen\'jin Village begin a chant to celebrate $n.',0,2,0,0,'raid spectator EMOTE_TROLLS'),
+(-1650020,'The tauren of Thunder Bluff cheer for $n.',0,2,0,0,'raid spectator EMOTE_TAUREN'),
+(-1650021,'The forsaken of the Undercity cheer for $n.',0,2,0,0,'raid spectator EMOTE_UNDEAD'),
+(-1650022,'The orcs of Orgrimmar cheer for $n.',0,2,0,0,'raid spectator EMOTE_ORCS'),
+(-1650023,'The dwarves of Ironforge begin a cheer for $n.',0,2,0,0,'raid spectator EMOTE_BLOOD_DWARVES'),
+(-1650024,'The gnomes of Gnomeregan cheer for $n.',0,2,0,0,'raid spectator EMOTE_GNOMES'),
+(-1650025,'The night elves of Darnassus cheer for $n.',0,2,0,0,'raid spectator EMOTE_NIGHT_ELVES'),
+(-1650026,'The humans of Stormwind cheer for $n.',0,2,0,0,'raid spectator EMOTE_HUMANS'),
+(-1650027,'The draenei of the Exodar cheer for $n.',0,2,0,0,'raid spectator EMOTE_DRAENEI'),
+
+(-1650028,'Well fought! Your next challenge comes from the Crusade\'s own ranks. You will be tested against their considerable prowess.',0,1,0,0,'tirion SAY_TIRION_ARGENT_CHAMPION'),
+(-1650029,'You may begin!',0,1,0,22,'tirion SAY_TIRION_ARGENT_CHAMPION_BEGIN'),
+(-1650030,'Entering the arena, a paladin who is no stranger to the battlefield or tournament ground, the Grand Champion of the Argent Crusade, Eadric the Pure!',0,1,0,0,'toc herald SAY_EADRIC'),
+(-1650031,'The next combatant is second to none in her passion for upholding the Light. I give you Argent Confessor Paletress!',0,1,0,0,'toc herald SAY_PALETRESS'),
+(-1650032,'The Horde spectators cheer for $n.',0,2,0,0,'raid spectator EMOTE_HORDE_ARGENT_CHAMPION'),
+(-1650033,'The Alliance spectators cheer for $n.',0,2,0,0,'raid spectator EMOTE_ALLIANCE_ARGENT_CHAMPION'),
+(-1650034,'Are you up to the challenge? I will not hold back.',16134,0,0,397,'eadric SAY_EADRIC_INTRO'),
+(-1650035,'Thank you, good herald. Your words are too kind.',16245,0,0,2,'paletress SAY_PALETRESS_INTRO_1'),
+(-1650036,'May the Light give me strength to provide a worthy challenge.',16246,0,0,16,'paletress SAY_PALETRESS_INTRO_2'),
+
+(-1650037,'Well done. You have proven yourself today-',0,1,0,0,'tirion SAY_ARGENT_CHAMPION_COMPLETE'),
+(-1650038,'What\'s that, up near the rafters?',0,0,0,25,'toc herald SAY_BLACK_KNIGHT_SPAWN'),
+(-1650039,'You spoiled my grand entrance, rat.',16256,0,0,0,'black knight SAY_BLACK_KNIGHT_INTRO_1'),
+(-1650040,'What is the meaning of this?',0,1,0,0,'tirion SAY_TIRION_BLACK_KNIGHT_INTRO_2'),
+(-1650041,'Did you honestly think an agent of the Lich King would be bested on the field of your pathetic little tournament?',16257,0,0,396,'black knight SAY_BLACK_KNIGHT_INTRO_3'),
+(-1650042,'I\'ve come to finish my task.',16258,0,0,396,'black knight SAY_BLACK_KNIGHT_INTRO_4'),
+
+(-1650043,'My congratulations, champions. Through trials both planned and unexpected, you have triumphed.',0,1,0,0,'tirion SAY_EPILOG_1'),
+(-1650044,'Go now and rest; you\'ve earned it.',0,1,0,0,'tirion SAY_EPILOG_2'),
+(-1650045,'You fought well.',0,1,0,66,'king varian SAY_VARIAN_EPILOG_3'),
+(-1650046,'Well done, Horde!',0,1,0,66,'thrall SAY_THRALL_HORDE_EPILOG_3'),
+
+(-1650047,'Tear him apart!',0,1,0,22,'garrosh SAY_GARROSH_OTHER_1'),
+(-1650048,'Garrosh, enough.',0,1,0,396,'thrall SAY_THRALL_OTHER_2'),
+(-1650049,'Admirably? Hah! I will enjoy watching your weak little champions fail, human.',0,1,0,22,'garrosh SAY_GARROSH_OTHER_3'),
+(-1650050,'Don\'t just stand there; kill him!',0,1,0,22,'king varian SAY_VARIAN_OTHER_4'),
+(-1650051,'I did not come here to watch animals tear at each other senselessly, Tirion.',0,1,0,1,'king varian SAY_VARIAN_OTHER_5');
 
 -- -1 658 000 ICC: PIT OF SARON
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -5024,6 +5120,11 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3649009,'Your words of praise are appreciated, Coliseum Master.','barrett GOSSIP_ITEM_ANUB_INIT'),
 (-3649010,'That is strange...','barrett GOSSIP_ITEM_ANUB_START');
 
+-- -3 650 000 TRIAL OF THE CHAMPION
+INSERT INTO gossip_texts (entry,content_default,comment) VALUES
+(-3650000,'I am ready.','herald GOSSIP_ITEM_READY'),
+(-3650001,'I am ready. However, I\'d like to skip the pageantry.','herald GOSSIP_ITEM_READY_SKIP_INTRO'),
+(-3650002,'I am ready for the next challenge.','herald GOSSIP_ITEM_READY_NEXT_CHALLENGE');
 
 --
 -- Below just for beautiful view in table, run at own desire
@@ -8581,5 +8682,88 @@ INSERT INTO script_waypoint VALUES
 (26588, 25, 4350.807, -3944.965, 190.528, 0, 'SAY_ESCORT_COMPLETE'),
 (26588, 26, 4347.947, -3958.875, 193.360, 0, ''),
 (26588, 27, 4345.956, -3988.083, 187.320, 0, '');
+
+DELETE FROM script_waypoint WHERE entry=26499;
+INSERT INTO script_waypoint VALUES
+(26499, 0, 2366.184, 1197.285, 132.150, 0, ''),
+(26499, 1, 2371.608, 1199.006, 134.727, 0, ''),
+(26499, 2, 2376.157, 1200.552, 134.042, 0, ''),
+(26499, 3, 2391.321, 1203.153, 134.125, 10000, 'SAY_ARRIVED'),
+(26499, 4, 2391.321, 1203.153, 134.125, 0, 'SAY_GET_BEFORE_PLAGUE'),
+(26499, 5, 2396.739, 1205.993, 134.125, 0, 'escort paused'),
+(26499, 6, 2396.739, 1205.993, 134.125, 8000, ''),
+(26499, 7, 2396.739, 1205.993, 134.125, 5000, 'SAY_MORE_THAN_SCOURGE'),
+(26499, 8, 2412.033, 1207.823, 134.034, 0, ''),
+(26499, 9, 2426.958, 1212.363, 134.000, 0, ''),
+(26499, 10, 2438.589, 1217.005, 133.957, 0, ''),
+(26499, 11, 2441.247, 1215.506, 133.951, 0, ''),
+(26499, 12, 2446.155, 1197.135, 148.064, 0, ''),
+(26499, 13, 2446.861, 1193.559, 148.076, 0, 'SAY_MORE_SORCERY'),
+(26499, 14, 2443.582, 1189.773, 148.076, 0, 'escort paused'),
+(26499, 15, 2443.582, 1189.773, 148.076, 8000, ''),
+(26499, 16, 2443.582, 1189.773, 148.076, 5000, 'SAY_MOVE_ON'),
+(26499, 17, 2430.986, 1193.844, 148.076, 0, ''),
+(26499, 18, 2418.701, 1195.074, 148.076, 0, ''),
+(26499, 19, 2410.825, 1193.033, 148.076, 0, ''),
+(26499, 20, 2405.178, 1177.300, 148.076, 0, ''),
+(26499, 21, 2409.676, 1155.144, 148.187, 0, 'SAY_WATCH_BACKS - escort paused'),
+(26499, 22, 2409.676, 1155.144, 148.187, 8000, ''),
+(26499, 23, 2409.676, 1155.144, 148.187, 3000, 'SAY_NOT_EASY'),
+(26499, 24, 2413.030, 1138.769, 148.075, 0, ''),
+(26499, 25, 2421.589, 1122.539, 148.125, 0, ''),
+(26499, 26, 2425.375, 1119.325, 148.075, 0, 'SAY_PERSISTENT'),
+(26499, 27, 2425.375, 1119.325, 148.075, 8000, ''),
+(26499, 28, 2425.375, 1119.325, 148.075, 0, 'SAY_ELSE - escort paused'),
+(26499, 29, 2447.376, 1114.935, 148.075, 0, ''),
+(26499, 30, 2454.853, 1117.053, 150.007, 0, ''),
+(26499, 31, 2459.909, 1125.710, 150.007, 0, ''),
+(26499, 32, 2468.208, 1124.426, 150.027, 5000, 'SAY_TAKE_A_MOMENT'),
+(26499, 33, 2468.208, 1124.426, 150.027, 0, 'SAY_PASSAGE'),
+(26499, 34, 2482.697, 1122.354, 149.905, 0, ''),
+(26499, 35, 2485.536, 1111.682, 149.907, 0, ''),
+(26499, 36, 2486.997, 1103.307, 145.335, 0, ''),
+(26499, 37, 2490.222, 1100.452, 144.860, 0, ''),
+(26499, 38, 2496.676, 1102.510, 144.474, 0, ''),
+(26499, 39, 2495.006, 1115.535, 143.825, 0, ''),
+(26499, 40, 2493.206, 1123.732, 140.302, 0, ''),
+(26499, 41, 2496.522, 1128.798, 140.010, 0, ''),
+(26499, 42, 2500.956, 1127.101, 139.982, 0, ''),
+(26499, 43, 2504.459, 1120.400, 139.976, 0, ''),
+(26499, 44, 2506.478, 1120.344, 139.970, 0, ''),
+(26499, 45, 2517.028, 1122.504, 132.064, 0, ''),
+(26499, 46, 2523.487, 1124.808, 132.080, 0, 'encounter complete - despawn'),
+(26499, 47, 2551.116, 1135.607, 129.797, 0, ''),
+(26499, 48, 2562.692, 1147.900, 128.003, 0, ''),
+(26499, 49, 2565.026, 1168.818, 127.007, 0, ''),
+(26499, 50, 2562.405, 1189.934, 126.189, 0, ''),
+(26499, 51, 2558.311, 1212.633, 125.739, 0, ''),
+(26499, 52, 2551.082, 1231.603, 125.554, 0, ''),
+(26499, 53, 2543.631, 1250.385, 126.103, 0, ''),
+(26499, 54, 2534.270, 1272.281, 126.993, 0, ''),
+(26499, 55, 2521.446, 1290.463, 130.194, 0, ''),
+(26499, 56, 2517.060, 1312.327, 130.156, 0, ''),
+(26499, 57, 2513.198, 1324.149, 131.843, 20000, 'SAY_REST'),
+(26499, 58, 2513.198, 1324.149, 131.843, 0, 'SAY_REST_COMPLETE'),
+(26499, 59, 2503.484, 1347.347, 132.952, 0, ''),
+(26499, 60, 2491.935, 1367.205, 130.717, 0, ''),
+(26499, 61, 2482.922, 1386.118, 130.029, 0, ''),
+(26499, 62, 2471.576, 1404.726, 130.681, 0, ''),
+(26499, 63, 2459.646, 1418.801, 130.662, 0, ''),
+(26499, 64, 2440.002, 1423.901, 130.632, 0, ''),
+(26499, 65, 2416.750, 1419.929, 130.669, 0, ''),
+(26499, 66, 2401.423, 1415.888, 130.840, 0, ''),
+(26499, 67, 2381.814, 1410.022, 128.147, 0, ''),
+(26499, 68, 2367.663, 1406.689, 128.529, 0, ''),
+(26499, 69, 2361.863, 1405.020, 128.714, 0, 'SAY_CRUSADER_SQUARE - escort paused'),
+(26499, 70, 2341.932, 1406.359, 128.268, 0, ''),
+(26499, 71, 2328.375, 1413.144, 127.687, 0, ''),
+(26499, 72, 2319.288, 1435.609, 127.887, 0, ''),
+(26499, 73, 2308.846, 1460.503, 127.840, 0, ''),
+(26499, 74, 2301.277, 1487.081, 128.361, 0, 'SAY_FINISH_MALGANIS - escort paused'),
+(26499, 75, 2301.277, 1487.081, 128.361, 18000, 'SAY_JOURNEY_BEGUN'),
+(26499, 76, 2293.693, 1506.805, 128.737, 18000, 'SAY_HUNT_MALGANIS'),
+(26499, 77, 2300.743, 1487.231, 128.362, 0, ''),
+(26499, 78, 2308.582, 1460.863, 127.839, 0, ''),
+(26499, 79, 2326.608, 1420.555, 127.780, 0, '');
 
 -- EOF

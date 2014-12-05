@@ -100,6 +100,8 @@ INSERT INTO scripted_areatrigger VALUES
 (5714, 'at_hot_on_the_trail'),
 (5715, 'at_hot_on_the_trail'),
 (5716, 'at_hot_on_the_trail');
+DELETE FROM scripted_areatrigger WHERE entry=3587;
+INSERT INTO scripted_areatrigger VALUES (3587,'at_ancient_leaf');
 
 
 /* BATTLEGROUNDS */
@@ -327,6 +329,7 @@ UPDATE creature_template SET ScriptName='npc_enslaved_soul' WHERE entry=23469;
 /* BLACKFATHOM DEPTHS */
 UPDATE instance_template SET ScriptName='instance_blackfathom_deeps' WHERE map=48;
 UPDATE gameobject_template SET ScriptName='go_fire_of_akumai' WHERE entry IN (21118,21119,21120,21121);
+UPDATE gameobject_template SET ScriptName='go_fathom_stone' WHERE entry=177964;
 
 /* BLACKROCK DEPTHS */
 DELETE FROM scripted_areatrigger WHERE entry=1526;
@@ -425,6 +428,7 @@ UPDATE instance_template SET ScriptName='instance_culling_of_stratholme' WHERE m
 UPDATE creature_template SET ScriptName='npc_chromie' WHERE entry IN (26527, 27915);
 UPDATE creature_template SET ScriptName='spell_dummy_npc_crates_bunny' WHERE entry=27827;
 UPDATE creature_template SET ScriptName='npc_arthas' WHERE entry=26499;
+UPDATE creature_template SET ScriptName='npc_spell_dummy_crusader_strike' WHERE entry IN (28167,28169);
 DELETE FROM scripted_areatrigger WHERE entry=5291;
 INSERT INTO scripted_areatrigger VALUES
 (5291,'at_culling_of_stratholme');
@@ -487,6 +491,8 @@ UPDATE creature_template SET ScriptName='boss_the_lurker_below' WHERE entry=2121
 /*  */
 
 /* TRAIL OF THE CHAMPION */
+UPDATE instance_template SET ScriptName='instance_trial_of_the_champion' WHERE map=650;
+UPDATE creature_template SET ScriptName='npc_toc_herald' WHERE entry IN (35004, 35005);
 
 /* TRIAL OF THE CRUSADER */
 UPDATE instance_template SET ScriptName='instance_trial_of_the_crusader' WHERE map=649;
