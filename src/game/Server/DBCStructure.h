@@ -536,10 +536,12 @@ struct AreaTableEntry
     // 35       m_lightid
 };
 
+#define MAX_GROUP_AREA_IDS 6
+
 struct AreaGroupEntry
 {
     uint32  AreaGroupId;                                    // 0        m_ID
-    uint32  AreaId[6];                                      // 1-6      m_areaID
+    uint32  AreaId[MAX_GROUP_AREA_IDS];                     // 1-6      m_areaID
     uint32  nextGroup;                                      // 7        m_nextAreaID
 };
 

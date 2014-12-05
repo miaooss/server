@@ -12876,6 +12876,12 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
         GetSession()->SendPacket(&data);
 }
 
+bool Player::IsEquippedWeaponUsed(bool mainhand) const
+{
+    // disarm applied only to mainhand weapon
+    return !IsInFeralForm() && (!mainhand || !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED));
+}
+
 /*********************************************************/
 /***                    GOSSIP SYSTEM                  ***/
 /*********************************************************/

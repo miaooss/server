@@ -1301,3 +1301,344 @@ bool SpellInfo::IsAuraExclusiveBySpecificPerCasterWith(SpellInfo const* spellInf
             return false;
     }
 }
+
+SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
+{
+    // talents that learn spells can have stance requirements that need ignore
+    // (this requirement only for client-side stance show in talent description)
+    if (GetTalentSpellCost(Id) > 0 &&
+        (Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[1].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[2].Effect == SPELL_EFFECT_LEARN_SPELL))
+        return SPELL_CAST_OK;
+
+    uint32 stanceMask = (form ? 1 << (form - 1) : 0);
+
+    if (stanceMask & StancesNot)                 // can explicitly not be cast in this stance
+        return SPELL_FAILED_NOT_SHAPESHIFT;
+
+    if (stanceMask & Stances)                    // can explicitly be cast in this stance
+        return SPELL_CAST_OK;
+
+    bool actAsShifted = false;
+    SpellShapeshiftFormEntry const* shapeInfo = NULL;
+    if (form > 0)
+    {
+        shapeInfo = sSpellShapeshiftFormStore.LookupEntry(form);
+        if (!shapeInfo)
+        {
+            sLog.outError("[Spell System] GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
+            return SPELL_CAST_OK;
+        }
+        actAsShifted = !(shapeInfo->flags1 & 1);            // shapeshift acts as normal form for spells
+    }
+
+    if (actAsShifted)
+    {
+        if (Attributes & SPELL_ATTR_NOT_SHAPESHIFT) // not while shapeshifted
+            return SPELL_FAILED_NOT_SHAPESHIFT;
+        else if (Stances != 0)                   // needs other shapeshift
+            return SPELL_FAILED_ONLY_SHAPESHIFT;
+    }
+    else
+    {
+        // needs shapeshift
+        if (!(AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && Stances != 0)
+            return SPELL_FAILED_ONLY_SHAPESHIFT;
+    }
+
+    // Check if stance disables cast of not-stance spells
+    // Example: cannot cast any other spells in zombie or ghoul form
+    /// @todo Find a way to disable use of these spells clientside
+    if (shapeInfo && shapeInfo->flags1 & 0x400)
+    {
+        if (!(stanceMask & Stances))
+            return SPELL_FAILED_ONLY_SHAPESHIFT;
+    }
+
+    return SPELL_CAST_OK;
+}
+
+SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player) const
+{
+    // normal case
+    if (AreaGroupId > 0)
+    {
+        bool found = false;
+        AreaGroupEntry const* groupEntry = sAreaGroupStore.LookupEntry(AreaGroupId);
+        while (groupEntry)
+        {
+            for (uint8 i = 0; i < MAX_GROUP_AREA_IDS; ++i)
+                if (groupEntry->AreaId[i] == zone_id || groupEntry->AreaId[i] == area_id)
+                    found = true;
+            if (found || !groupEntry->nextGroup)
+                break;
+            // Try search in next group
+            groupEntry = sAreaGroupStore.LookupEntry(groupEntry->nextGroup);
+        }
+
+        if (!found)
+            return SPELL_FAILED_INCORRECT_AREA;
+    }
+
+    // continent limitation (virtual continent)
+    if (AttributesEx4 & SPELL_ATTR_EX4_CAST_ONLY_IN_OUTLAND)
+    {
+        uint32 v_map = GetVirtualMapForMapAndZone(map_id, zone_id);
+        MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
+        if (!mapEntry || mapEntry->addon < 1 || !mapEntry->IsContinent())
+            return SPELL_FAILED_INCORRECT_AREA;
+    }
+
+    // raid instance limitation
+    if (AttributesEx6 & SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCE)
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+        if (!mapEntry || mapEntry->IsRaid())
+            return SPELL_FAILED_NOT_IN_RAID_INSTANCE;
+    }
+
+    // DB base check (if non empty then must fit at least single for allow)
+    SpellAreaMapBounds saBounds = sSpellMgr->GetSpellAreaMapBounds(Id);
+    if (saBounds.first != saBounds.second)
+    {
+        for (SpellAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+        {
+            if (itr->second.IsFitToRequirements(player, zone_id, area_id))
+                return SPELL_CAST_OK;
+        }
+        return SPELL_FAILED_INCORRECT_AREA;
+    }
+
+    // bg spell checks
+    switch (Id)
+    {
+        case 23333:                                         // Warsong Flag
+        case 23335:                                         // Silverwing Flag
+            return map_id == 489 && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        case 34976:                                         // Netherstorm Flag
+            return map_id == 566 && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        case 2584:                                          // Waiting to Resurrect
+        case 22011:                                         // Spirit Heal Channel
+        case 22012:                                         // Spirit Heal
+        case 24171:                                         // Resurrection Impact Visual
+        case 42792:                                         // Recently Dropped Flag
+        case 43681:                                         // Inactive
+        case 44535:                                         // Spirit Heal (mana)
+        {
+            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+            if (!mapEntry)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            return zone_id == 4197 || (mapEntry->IsBattleGround() && player && player->InBattleGround()) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
+        case 44521:                                         // Preparation
+        {
+            if (!player)
+                return SPELL_FAILED_REQUIRES_AREA;
+
+            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+            if (!mapEntry)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            if (!mapEntry->IsBattleground())
+                return SPELL_FAILED_REQUIRES_AREA;
+
+            BattleGround* bg = player->GetBattleGround();
+            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
+        case 32724:                                         // Gold Team (Alliance)
+        case 32725:                                         // Green Team (Alliance)
+        case 35774:                                         // Gold Team (Horde)
+        case 35775:                                         // Green Team (Horde)
+        {
+            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+            if (!mapEntry)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            return mapEntry->IsBattleArena() && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
+        case 32727:                                         // Arena Preparation
+        {
+            if (!player)
+                return SPELL_FAILED_REQUIRES_AREA;
+
+            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+            if (!mapEntry)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            if (!mapEntry->IsBattleArena())
+                return SPELL_FAILED_REQUIRES_AREA;
+
+            BattleGround* bg = player->GetBattleGround();
+            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
+    }
+
+    // aura limitations
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (!Effects[i].IsAura())
+            continue;
+        switch (Effects[i].ApplyAuraName)
+        {
+            case SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED:
+            case SPELL_AURA_FLY:
+            {
+                if (player && !player->CanStartFlyInArea(map_id, zone_id, area_id))
+                    return SPELL_FAILED_INCORRECT_AREA;
+            }
+        }
+    }
+
+    return SPELL_CAST_OK;
+}
+
+SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* target, bool implicit) const
+{
+    if (AttributesEx & SPELL_ATTR_EX_CANT_TARGET_SELF && caster == target)
+        return SPELL_FAILED_BAD_TARGETS;
+
+    // check visibility - ignore stealth for implicit (area) targets
+    if (!(AttributesEx6 & SPELL_ATTR_EX6_CAN_TARGET_INVISIBLE) && !caster->IsVisibleForOrDetect(target, caster, implicit))
+        return SPELL_FAILED_BAD_TARGETS;
+
+    Unit const* unitTarget = target->ToUnit();
+
+    // creature/player specific target checks
+    if (unitTarget)
+    {
+        if (AttributesEx & SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET)
+        {
+            if (unitTarget->IsInCombat())
+                return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
+            // player with active pet counts as a player in combat
+            else if (Player const* player = unitTarget->ToPlayer())
+                if (Pet* pet = player->GetPet())
+                    if (pet->GetVictim() && !pet->HasUnitState(UNIT_STATE_CONTROLLED))
+                        return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
+        }
+
+        // only spells with SPELL_ATTR_EX3_CAST_ON_DEAD can target ghosts
+        if (((AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD) != 0) != unitTarget->HasAuraType(SPELL_AURA_GHOST))
+        {
+            if (AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD)
+                return SPELL_FAILED_TARGET_NOT_GHOST;
+            else
+                return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        if (caster != unitTarget)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
+                if (AttributesEx2 & SPELL_ATTR_EX2_CANT_TARGET_TAPPED)
+                    if (Creature const* targetCreature = unitTarget->ToCreature())
+                        if (targetCreature->HasLootRecipient() && !targetCreature->IsTappedBy(caster->ToPlayer()))
+                            return SPELL_FAILED_CANT_CAST_ON_TAPPED;
+
+                if (AttributesCu & SPELL_ATTR0_CU_PICKPOCKET)
+                {
+                     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                         return SPELL_FAILED_BAD_TARGETS;
+                     else if ((unitTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
+                         return SPELL_FAILED_TARGET_NO_POCKETS;
+                }
+
+                // Not allow disarm unarmed player
+                if (Mechanic == MECHANIC_DISARM)
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player const* player = unitTarget->ToPlayer();
+                        if (!player->GetWeaponForAttack(BASE_ATTACK) || !player->IsEquippedWeaponUsed(true))
+                            return SPELL_FAILED_TARGET_NO_WEAPONS;
+                    }
+                    else if (!unitTarget->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID))
+                        return SPELL_FAILED_TARGET_NO_WEAPONS;
+                }
+            }
+        }
+    }
+    // corpse specific target checks
+    else if (Corpse const* corpseTarget = target->ToCorpse())
+    {
+        // cannot target bare bones
+        if (corpseTarget->GetType() == CORPSE_BONES)
+            return SPELL_FAILED_BAD_TARGETS;
+        // we have to use owner for some checks (aura preventing resurrection for example)
+        if (Player* owner = ObjectAccessor::FindPlayer(corpseTarget->GetOwnerGUID()))
+            unitTarget = owner;
+        // we're not interested in corpses without owner
+        else
+            return SPELL_FAILED_BAD_TARGETS;
+    }
+    // other types of objects - always valid
+    else return SPELL_CAST_OK;
+
+    // corpseOwner and unit specific target checks
+    if (AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && !unitTarget->ToPlayer())
+       return SPELL_FAILED_TARGET_NOT_PLAYER;
+
+    if (!IsAllowingDeadTarget() && !unitTarget->IsAlive())
+       return SPELL_FAILED_TARGETS_DEAD;
+
+    // check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
+    if (implicit && AttributesEx6 & SPELL_ATTR_EX6_CANT_TARGET_CROWD_CONTROLLED && !unitTarget->CanFreeMove())
+       return SPELL_FAILED_BAD_TARGETS;
+
+    // checked in Unit::IsValidAttack/AssistTarget, shouldn't be checked for ENTRY targets
+    //if (!(AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+    //    return SPELL_FAILED_BAD_TARGETS;
+
+    //if (!(AttributesEx6 & SPELL_ATTR6_CAN_TARGET_POSSESSED_FRIENDS)
+
+    if (!CheckTargetCreatureType(unitTarget))
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            return SPELL_FAILED_TARGET_IS_PLAYER;
+        else
+            return SPELL_FAILED_BAD_TARGETS;
+    }
+
+    // check GM mode and GM invisibility - only for player casts (npc casts are controlled by AI) and negative spells
+    if (unitTarget != caster && (caster->IsControlledByPlayer() || !IsPositive()) && unitTarget->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (!unitTarget->ToPlayer()->isGMVisible())
+            return SPELL_FAILED_BM_OR_INVISGOD;
+
+        if (unitTarget->ToPlayer()->isGameMaster())
+            return SPELL_FAILED_BM_OR_INVISGOD;
+    }
+
+    // not allow casting on flying player
+    if (unitTarget->HasUnitState(UNIT_STATE_IN_FLIGHT))
+        return SPELL_FAILED_BAD_TARGETS;
+
+    /* TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
+    not allow passengers to be implicitly hit by spells, however this target type should be an exception,
+    if this is left it kills spells that award kill credit from vehicle to master (few spells),
+    the use of these 2 covers passenger target check, logically, if vehicle cast this to master it should always hit
+    him, because it would be it's passenger, there's no such case where this gets to fail legitimacy, this problem
+    cannot be solved from within the check in other way since target type cannot be called for the spell currently
+    Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
+    if (!caster->IsVehicle() && !(caster->GetCharmerOrOwner() == target))
+    {
+        if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
+            return SPELL_FAILED_TARGET_AURASTATE;
+
+        if (TargetAuraStateNot && unitTarget->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))
+            return SPELL_FAILED_TARGET_AURASTATE;
+    }
+
+    if (TargetAuraSpell && !unitTarget->HasAura(sSpellMgr.GetSpellIdForDifficulty(TargetAuraSpell, caster)))
+        return SPELL_FAILED_TARGET_AURASTATE;
+
+    if (ExcludeTargetAuraSpell && unitTarget->HasAura(sSpellMgr.GetSpellIdForDifficulty(ExcludeTargetAuraSpell, caster)))
+        return SPELL_FAILED_TARGET_AURASTATE;
+
+    if (unitTarget->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+        if (HasEffect(SPELL_EFFECT_SELF_RESURRECT) || HasEffect(SPELL_EFFECT_RESURRECT) || HasEffect(SPELL_EFFECT_RESURRECT_NEW))
+            return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+
+    return SPELL_CAST_OK;
+}
