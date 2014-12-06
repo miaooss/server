@@ -1513,7 +1513,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
             // player with active pet counts as a player in combat
             else if (Player const* player = unitTarget->ToPlayer())
                 if (Pet* pet = player->GetPet())
-                    if (pet->GetVictim() && !pet->HasUnitState(UNIT_STATE_CONTROLLED))
+                    if (pet->GetVictim() && !pet->hasUnitState(UNIT_STAT_CONTROLLED))
                         return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
         }
 
@@ -1611,7 +1611,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     }
 
     // not allow casting on flying player
-    if (unitTarget->HasUnitState(UNIT_STATE_IN_FLIGHT))
+    if (unitTarget->hasUnitState(UNIT_STAT_TAXI_FLIGHT))
         return SPELL_FAILED_BAD_TARGETS;
 
     /* TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
@@ -1640,5 +1640,42 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
         if (HasEffect(SPELL_EFFECT_SELF_RESURRECT) || HasEffect(SPELL_EFFECT_RESURRECT) || HasEffect(SPELL_EFFECT_RESURRECT_NEW))
             return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
 
+    return SPELL_CAST_OK;
+}
+
+SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject const* target, Item const* itemTarget) const
+{
+    uint32 neededTargets = GetExplicitTargetMask();
+    if (!target)
+    {
+        if (neededTargets & (TARGET_FLAG_UNIT_MASK | TARGET_FLAG_GAMEOBJECT_MASK | TARGET_FLAG_CORPSE_MASK))
+            if (!(neededTargets & TARGET_FLAG_GAMEOBJECT_ITEM) || !itemTarget)
+                return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    if (Unit const* unitTarget = target->ToUnit())
+    {
+        if (neededTargets & (TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT_RAID | TARGET_FLAG_UNIT_PARTY | TARGET_FLAG_UNIT_MINIPET | TARGET_FLAG_UNIT_PASSENGER))
+        {
+            if (neededTargets & TARGET_FLAG_UNIT_ENEMY)
+                if (unitTarget->IsTargetableForAttack((AttributesEx2 & SPELL_ATTR_EX2_CAN_TARGET_DEAD)))
+                    return SPELL_CAST_OK;
+        /* Left off here:
+            if (neededTargets & TARGET_FLAG_UNIT_ALLY
+                || (neededTargets & TARGET_FLAG_UNIT_PARTY && caster->IsInPartyWith(unitTarget))
+                || (neededTargets & TARGET_FLAG_UNIT_RAID && caster->IsInRaidWith(unitTarget)))
+                    if (caster->_IsValidAssistTarget(unitTarget, this))
+                        return SPELL_CAST_OK;
+            if (neededTargets & TARGET_FLAG_UNIT_MINIPET)
+                if (unitTarget->GetGUID() == caster->GetCritterGUID())
+                    return SPELL_CAST_OK;
+            if (neededTargets & TARGET_FLAG_UNIT_PASSENGER)
+                if (unitTarget->IsOnVehicle(caster))
+                    return SPELL_CAST_OK;
+            return SPELL_FAILED_BAD_TARGETS;
+         */
+        }
+    }
     return SPELL_CAST_OK;
 }

@@ -2651,6 +2651,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          */
         bool isFrozen() const;
         bool IsIgnoreUnitState(SpellEntry const* spell, IgnoreUnitState ignoreState);
+        
+        bool IsValidAssistTarget(Unit const* target) const;
+        bool _IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) const;
 
         /**
          * Checks if this \ref Unit could be targeted with an attack, things that make that
